@@ -1,0 +1,5 @@
+/data/
+/images/
+/.idea/
+/tests/.pytest_cache/
+/tests/test_data/.pytest_cache
