@@ -1,7 +1,7 @@
 
 # External libraries
-import pandas as pd
 from typing import Tuple
+import pandas as pd
 
 # Internal libraries
 import survey

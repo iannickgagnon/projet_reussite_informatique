@@ -1,24 +1,16 @@
 
+# External libraries
 import pickle
-import matplotlib.pyplot as plt
-from os import listdir
 from copy import deepcopy
 from statistics import mean
 
+import matplotlib.pyplot as plt
+
+# Internal libraries
+from anonymizer import anonymize
 from course import Course
 from events_parser import parse_events
 from results_parser import parse_results
-from anonymizer import anonymize
-from survey import Survey
-
-from constants import (
-    PATH_EVENTS,
-    PATH_RESULTS,
-    PATH_SURVEYS,
-    COURSE_ID_LENGTH,
-    SURVEY_NB_QUESTIONS,
-)
-
 
 if __name__ == '__main__':
 

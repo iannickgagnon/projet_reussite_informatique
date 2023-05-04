@@ -32,8 +32,8 @@ Internal functions:
 """
 
 # External libraries
-import pandas as pd
 import re
+import pandas as pd
 
 # Internal constants
 from constants import (

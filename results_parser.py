@@ -1,6 +1,6 @@
 import pandas as pd
-from typing import Iterable
 from typing import Tuple
+from typing import Iterable
 
 _TOKENS_GROUP_PROJECTS = ('TP', 'TRAVAIL', 'PRATIQUE', 'DEV')
 _TOKENS_MIDTERMS = ('INTRA', 'EXAM')
@@ -20,6 +20,7 @@ _100_PERCENT = 100
 _0_PERCENT = 0
 
 _TEAM_FLAG = 'Équ.'
+
 
 def _get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
     # Extract evaluation structure
@@ -80,12 +81,13 @@ def _standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _add_team_work_flag_row(df: pd.DataFrame) -> pd.DataFrame:
+
     df.loc[_INDEX_GROUP_PROJECT] = [True if 'TP' in col else False for col in df.columns]
 
     return df
 
 
-def _get_grades(df: pd.DataFrame, df_structure: pd.DataFrame) -> pd.DataFrame:
+def _get_grades(df: pd.DataFrame) -> pd.DataFrame:
 
     # Extract teams flag
     df_team_work_flag = df.iloc[8, 3::]
@@ -165,8 +167,9 @@ def _build_evaluation_structure_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _build_grades_data(df: pd.DataFrame, df_structure: pd.DataFrame) -> pd.DataFrame:
+
     # Extract grades
-    df_grades = _get_grades(df, df_structure)
+    df_grades = _get_grades(df)
 
     # Fix column names
     df_grades = _standardize_grades_column_names(df_grades, df_structure.columns)

@@ -1,17 +1,17 @@
 
 # External libraries
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
 # Internal libraries
 import survey
 from student import Student
-from results_parser import parse_results
-from events_parser import parse_events
 from anonymizer import anonymize
+from events_parser import parse_events
+from results_parser import parse_results
 
 # Internal constants
 from constants import (
@@ -37,6 +37,7 @@ from constants import (
     PLOT_BORDER_MARGIN_FACTOR_SMALL,
     PLOT_HISTOGRAM_CONFIG,
 )
+
 
 
 class Course:
