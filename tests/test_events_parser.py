@@ -1,7 +1,8 @@
+
 # External libraries
-from unittest.mock import patch
-import pandas as pd
 import pytest
+import pandas as pd
+from unittest.mock import patch
 
 # Internal libraries
 from events_parser import (

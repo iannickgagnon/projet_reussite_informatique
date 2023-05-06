@@ -1,3 +1,4 @@
+
 # Paths to project files
 PATH_EVENTS = './data/events/'
 PATH_RESULTS = './data/results/'

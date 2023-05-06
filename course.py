@@ -56,6 +56,7 @@ class Course:
         students (list): The list of students in the course.
 
     Methods:
+
         __init__(self, evaluation_structure: DataFrame, course_id: str, semester_id: str, events: DataFrame,
                  results: DataFrame, surveys: survey.Survey) -> None:
             Initializes a new instance of the Course class.

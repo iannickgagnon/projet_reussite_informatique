@@ -1,5 +1,30 @@
 
 class SurveyAnswers:
+    """
+    A class representing the survey answers of a student.
+
+    Attributes:
+        answers (dict): A dictionary containing the survey question-answer pairs.
+        nb_questions (int): The number of questions in the survey.
+        student_name (str): The name of the student who provided the survey answers.
+
+    Methods:
+
+        init(self, answers: dict, student_name: str) -> None:
+            Initializes a SurveyAnswers object.
+
+        iter(self) -> SurveyAnswers:
+            Initializes an iterator position.
+
+        next(self) -> dict:
+            Returns the next survey answer in the iteration.
+
+        getitem(self, index: int) -> dict:
+            Returns the survey answer at the specified index.
+
+        repr(self) -> str:
+            Returns the string representation of the SurveyAnswers object.
+    """
 
     def __init__(self, answers: dict, student_name: str):
         """
