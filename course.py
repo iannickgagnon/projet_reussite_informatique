@@ -63,19 +63,19 @@ class Course:
         __build(self) -> None:
             Builds the data structure of the course.
 
-        _get_student_events_by_name(self, name: str):
+        get_student_events_by_name(self, name: str):
             Gets the events of a specific student.
 
-        _get_student_results_by_name(self, name: str):
+        get_student_results_by_name(self, name: str):
             Gets the results of a specific student.
 
-        _student_calculate_averages(self, student: Student):
+        __student_calculate_averages(self, student: Student):
             Calculates the averages of a specific student.
 
-        _get_individual_avg_vector(self, normalize=False):
+        __get_individual_avg_vector(self, normalize=False):
             Gets the vector of individual averages.
 
-        _get_engagement_vector(self, normalize=False):
+        __get_engagement_vector(self, normalize=False):
             Gets the vector of student engagement.
 
         plot_individual_avg_vs_engagement(self, normalize=False, linear_regression=False):
@@ -97,7 +97,7 @@ class Course:
         plot_combined_stacked_distributions_pass_fail():
             Plots the combined stacked distributions for passes and failures.
 
-        _letter_grade_to_points(grade: str) -> float:
+        letter_grade_to_points(grade: str) -> float:
             Converts a letter grade to a points value.
     """
 
@@ -153,8 +153,8 @@ class Course:
             name = self.results.iloc[i][COL_NAME_NAME]
 
             # Extract student's data
-            events = self._get_student_events_by_name(name)
-            results = self._get_student_results_by_name(name)
+            events = self.get_student_events_by_name(name)
+            results = self.get_student_results_by_name(name)
 
             # Add student to pool
             self.students.append(Student(name, events, results))
@@ -166,7 +166,7 @@ class Course:
             # Store student's letter grades
             self.students[LAST_ELEMENT_INDEX].grade = results[COL_NAME_GRADE].iat[0]
 
-    def _get_student_events_by_name(self, name: str):
+    def get_student_events_by_name(self, name: str):
         """
         Gets the events associated with a student by their name.
 
@@ -179,7 +179,7 @@ class Course:
 
         return self.events.query(f'{COL_NAME_NAME} == \'{name}\'')
 
-    def _get_student_results_by_name(self, name: str):
+    def get_student_results_by_name(self, name: str):
         """
         Gets the results of a student by their name.
 
@@ -191,7 +191,7 @@ class Course:
         """
         return self.results.query(f'{COL_NAME_NAME} == \'{name}\'')
 
-    def _student_calculate_averages(self, student: Student):
+    def __student_calculate_averages(self, student: Student):
         """
         Calculates individual and group work averages for a given student based on the
         evaluation structure and the student's results.
@@ -234,7 +234,7 @@ class Course:
         assert weight_individual + weight_group_projects == _100_PERCENT, \
             f'Sum of weights not equal to 100 {weight_individual + weight_group_projects}'
 
-    def _get_individual_avg_vector(self, normalize=False):
+    def __get_individual_avg_vector(self, normalize=False):
         """
         Gets the individual averages of all the students in the course.
 
@@ -255,7 +255,7 @@ class Course:
 
         return average
 
-    def _get_engagement_vector(self, normalize=False):
+    def __get_engagement_vector(self, normalize=False):
         """
         Gets the number of events attended by each student in the course.
 
@@ -289,8 +289,8 @@ class Course:
         """
 
         # Get events counts and individual average
-        average = self._get_individual_avg_vector()
-        nb_events = self._get_engagement_vector(normalize=normalize)
+        average = self.__get_individual_avg_vector()
+        nb_events = self.__get_engagement_vector(normalize=normalize)
 
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
@@ -410,8 +410,8 @@ class Course:
         for course in courses:
 
             # Get events counts and individual averages
-            course_averages = course._get_individual_avg_vector()
-            course_nb_events = course._get_engagement_vector(normalize=True)
+            course_averages = course.__get_individual_avg_vector()
+            course_nb_events = course.__get_engagement_vector(normalize=True)
 
             for i in range(len(course_averages)):
 
@@ -595,7 +595,7 @@ class Course:
         return fig, ax
 
     @staticmethod
-    def _letter_grade_to_points(grade: str) -> float:
+    def letter_grade_to_points(grade: str) -> float:
         """
         Convert a letter grade to a point value.
 
