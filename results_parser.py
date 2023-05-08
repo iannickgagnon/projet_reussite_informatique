@@ -22,7 +22,17 @@ _0_PERCENT = 0
 _TEAM_FLAG = 'Équ.'
 
 
-def _get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
+def __get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract the evaluation structure from the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the evaluation structure.
+
+    Returns:
+        (pd.DataFrame): The extracted evaluation structure.
+    """
+
     # Extract evaluation structure
     df_structure = df.iloc[6: 8, 3: df.shape[1] - 2]
 
@@ -45,11 +55,32 @@ def _get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
     return df_structure
 
 
-def _any_token_in_string(string: str, tokens: Iterable[str]) -> bool:
-    return any([token in string for token in tokens])
+def any_token_in_string(string: str, tokens: Iterable[str]) -> bool:
+    """
+    Check if any of the given tokens is present in the given string.
+
+    Args:
+        string (str): The string to check.
+        tokens (Iterable[str]): The tokens to look for.
+
+    Returns:
+        (bool): True if any of the tokens is present in the string, False otherwise.
+    """
+
+    return any(token in string for token in tokens)
 
 
-def _standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
+def __standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Standardize the column names in the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to standardize.
+
+    Returns:
+        (pd.DataFrame): The DataFrame with standardized column names.
+    """
+
     # Initialize counters
     tp_count = 1
     exam_count = 1
@@ -62,15 +93,15 @@ def _standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
 
     for col in df.columns:
 
-        # FIXME: Finals need to be processed before midterms to avoid ambiguous names such as 'Examen Final'.
+        # Note: Finals need to be processed before midterms to avoid ambiguous names such as 'Examen Final'.
 
         # Build mapping
-        if _any_token_in_string(col, _TOKENS_GROUP_PROJECTS):
+        if any_token_in_string(col, _TOKENS_GROUP_PROJECTS):
             mapping[col] = f'TP0{tp_count}'
             tp_count += 1
-        elif _any_token_in_string(col, _TOKENS_FINAL_EXAM):
+        elif any_token_in_string(col, _TOKENS_FINAL_EXAM):
             mapping[col] = 'FINAL'
-        elif _any_token_in_string(col, _TOKENS_MIDTERMS):
+        elif any_token_in_string(col, _TOKENS_MIDTERMS):
             mapping[col] = f'EXAM0{exam_count}'
             exam_count += 1
 
@@ -80,14 +111,32 @@ def _standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _add_team_work_flag_row(df: pd.DataFrame) -> pd.DataFrame:
+def __add_team_work_flag_row(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a row to the given DataFrame that contains a flag for group projects.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to modify.
+
+    Returns:
+        (pd.DataFrame): The modified DataFrame.
+    """
 
     df.loc[_INDEX_GROUP_PROJECT] = [True if 'TP' in col else False for col in df.columns]
 
     return df
 
 
-def _get_grades(df: pd.DataFrame) -> pd.DataFrame:
+def __get_grades(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract the grades from the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the grades.
+
+    Returns:
+        (pd.DataFrame): The extracted grades.
+    """
 
     # Extract teams flag
     df_team_work_flag = df.iloc[8, 3::]
@@ -127,7 +176,17 @@ def _get_grades(df: pd.DataFrame) -> pd.DataFrame:
     return df_grades
 
 
-def _remove_rows_of_nans_grades(df: pd.DataFrame) -> pd.DataFrame:
+def __remove_rows_of_nans_grades(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove rows from the given DataFrame where the grades are just NaNs.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to modify.
+
+    Returns:
+        (pd.DataFrame): The modified DataFrame.
+    """
+
     rows_to_remove = []
     for i in range(df.shape[0]):
         if pd.isna(df[_COL_NAME_AVERAGE].iat[i]):
@@ -135,12 +194,34 @@ def _remove_rows_of_nans_grades(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop(rows_to_remove)
 
 
-def _standardize_grades_column_names(df: pd.DataFrame, structure_columns: pd.Index) -> pd.DataFrame:
+def __standardize_grades_column_names(df: pd.DataFrame, structure_columns: pd.Index) -> pd.DataFrame:
+    """
+    Standardize the column names in the given grades DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to standardize.
+        structure_columns (pd.Index): The index of the evaluation structure columns.
+
+    Returns:
+        (pd.DataFrame): The standardized grades DataFrame.
+    """
+
     df.columns = pd.Index([_COL_NAME_NAME] + list(structure_columns) + [_COL_NAME_AVERAGE, _COL_NAME_GRADE])
     return df
 
 
-def _normalize_grades(df_structure: pd.DataFrame, df_grades: pd.DataFrame) -> pd.DataFrame:
+def __normalize_grades(df_structure: pd.DataFrame, df_grades: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize the grades in the given DataFrame based on the evaluation structure.
+
+    Args:
+        df_structure (pd.DataFrame): The evaluation structure DataFrame.
+        df_grades (pd.DataFrame): The grades DataFrame to normalize.
+
+    Returns:
+        (pd.DataFrame): The normalized grades DataFrame.
+    """
+
     for col in df_structure.columns:
         if df_structure[col].loc[_INDEX_CORRECTED_ON] != _100_PERCENT and \
            df_structure[col].loc[_INDEX_CORRECTED_ON] != _0_PERCENT:
@@ -152,49 +233,80 @@ def _normalize_grades(df_structure: pd.DataFrame, df_grades: pd.DataFrame) -> pd
     return df_grades
 
 
-def _build_evaluation_structure_data(df: pd.DataFrame) -> pd.DataFrame:
+def __build_evaluation_structure_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Build the evaluation structure data from the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the evaluation structure.
+
+    Returns:
+        (pd.DataFrame): The evaluation structure DataFrame.
+    """
 
     # Extract evaluation structure data
-    df_structure = _get_evaluation_structure(df)
+    df_structure = __get_evaluation_structure(df)
 
     # Fix column names
-    df_structure = _standardize_structure_column_names(df_structure)
+    df_structure = __standardize_structure_column_names(df_structure)
 
     # Add a row that contains a flag for group projects
-    df_structure = _add_team_work_flag_row(df_structure)
+    df_structure = __add_team_work_flag_row(df_structure)
 
     return df_structure
 
 
-def _build_grades_data(df: pd.DataFrame, df_structure: pd.DataFrame) -> pd.DataFrame:
+def __build_grades_data(df: pd.DataFrame, df_structure: pd.DataFrame) -> pd.DataFrame:
+    """
+    Build the grades data from the given DataFrames.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the grades.
+        df_structure (pd.DataFrame): The DataFrame containing the evaluation structure.
+
+    Returns:
+        (pd.DataFrame): The grades DataFrame.
+    """
 
     # Extract grades
-    df_grades = _get_grades(df)
+    df_grades = __get_grades(df)
 
     # Fix column names
-    df_grades = _standardize_grades_column_names(df_grades, df_structure.columns)
+    df_grades = __standardize_grades_column_names(df_grades, df_structure.columns)
 
     # Remove rows where grades are just NaNs
-    df_grades = _remove_rows_of_nans_grades(df_grades)
+    df_grades = __remove_rows_of_nans_grades(df_grades)
 
     # Adjust grades
-    df_grades = _normalize_grades(df_structure, df_grades)
+    df_grades = __normalize_grades(df_structure, df_grades)
+
+    # Replace NaNs with zeros
+    df_grades.fillna(0.0, inplace=True)
 
     return df_grades
 
 
 def parse_results(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Parse the given results file.
+
+    Args:
+        filename (str): The name of the results file.
+
+    Returns:
+        (Tuple[pd.DataFrame, pd.DataFrame]): A tuple containing the evaluation structure DataFrame and the grades.
+
+    Raises:
+        AssertionError: If the sum of the evaluation weights is not equal to 100.
+    """
 
     # Read raw file
     df_raw = pd.read_csv(filename, sep=';')
 
     # Extract evaluation structure
-    df_structure = _build_evaluation_structure_data(df_raw)
+    df_structure = __build_evaluation_structure_data(df_raw)
 
     # Extract grades
-    df_grades = _build_grades_data(df_raw, df_structure)
-
-    # Replace NaNs with zeros
-    df_grades.fillna(0.0, inplace=True)
+    df_grades = __build_grades_data(df_raw, df_structure)
 
     return df_structure, df_grades

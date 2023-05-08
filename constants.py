@@ -4,6 +4,7 @@ PATH_EVENTS = './data/events/'
 PATH_RESULTS = './data/results/'
 PATH_SURVEYS = './data/surveys/'
 PATH_TEST_SURVEY_FROM_TESTS = './test_data/test_survey.csv'
+PATH_TEST_RESULTS_FROM_TESTS = './test_data/test_results.csv'
 PATH_MAIN_PLOT_STYLE = './images/main_plot_style.mplstyle'
 
 # DataFrame column names

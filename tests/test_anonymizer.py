@@ -1,6 +1,15 @@
+
+# External librearies
 import pandas as pd
+
+# Internal libraries
 from survey import Survey
-from anonymizer import anonymize, __clean_up
+
+from anonymizer import (
+    anonymize,
+    __clean_up,
+)
+
 
 def test_anonymize():
 

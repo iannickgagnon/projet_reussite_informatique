@@ -8,9 +8,9 @@
 ;;;;;;;Nota;#NOM?;8.5;100;100;;100;100;;8;;100;à ce;Cote
 No;Code permanent;Code universel;Nom;Prénom;Programme;Courriel;bene;#NOM?;10;10;10;;40;15;;0;;15;jour;finale
 -;-;-;-;-;-;-;-;-;Note;Note;Note;Équ.;Note;Note;Équ.;Note;Équ.;Note;Note;Cote
-1;DOEJ1234567;AA12345;John;Doe;7684;john.doe@etsmtl.ca;;;8.5;100;100;1;100;100;1;8;;100;100;A+
-2;DOEJ7654321;BB12345;Jane;Doe;7684;jane.doe@etsmtl.ca;;;4.25;50;50;2;50;50;2;4;;50;50;C
-3;STUI;CC12345;Invalid;Student;7684;invalid.student@etsmtl.ca;;;0;0;0;3;0;0;3;0;;0;0;E
+1;DOEJ1234567;AA12345;Doe;John;7684;john.doe@etsmtl.ca;;;8.5;100;100;1;100;100;1;8;;100;100;A+
+2;DOEJ7654321;BB12345;Doe;Jane;7684;jane.doe@etsmtl.ca;;;4.25;50;50;2;50;50;2;4;;50;50;C
+3;STUI;CC12345;Student;Invalid;7684;invalid.student@etsmtl.ca;;;;0;0;3;0;0;3;0;;0;0;E
 ;;;;;;;;Nombre=;3;3;3;;3;3;;3;;3;3;
 ;;;;;;;;Absentes=;0;0;0;;0;0;;0;;0;0;
 ;;;;;;;;Moyenne=;4;50;50;;50;50;;50;;50;50;
