@@ -5,6 +5,7 @@ PATH_RESULTS = './data/results/'
 PATH_SURVEYS = './data/surveys/'
 PATH_TEST_SURVEY_FROM_TESTS = './test_data/test_survey.csv'
 PATH_TEST_RESULTS_FROM_TESTS = './test_data/test_results.csv'
+PATH_TEST_EVENTS_FROM_TESTS = './test_data/test_events.csv'
 PATH_MAIN_PLOT_STYLE = './images/main_plot_style.mplstyle'
 
 # DataFrame column names
@@ -12,6 +13,7 @@ PATH_MAIN_PLOT_STYLE = './images/main_plot_style.mplstyle'
 ORIGINAL_COL_NAME_NAME = 'Nom complet'
 ORIGINAL_COL_NAME_TIME = 'Heure'
 
+COL_NAME_EVENT = 'Event'
 COL_NAME_AVERAGE = 'Average'
 COL_NAME_GRADE = 'Grade'
 COL_NAME_EXAM = 'EXAM'
