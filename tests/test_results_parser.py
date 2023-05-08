@@ -24,13 +24,10 @@ def test_data_raw():
     return df
 
 
-def test_build_evaluation_structure_data(test_data_raw: pd.DataFrame):
+@pytest.fixture
+def test_data_expected_structure():
 
-    # Get raw data DataFrame
-    df = test_data_raw
-
-    # Mock expected results DataFrame
-    expected = pd.DataFrame({
+    df = pd.DataFrame({
         "EXAM01": [8.5, 10.0, 0.0],
         "EXAM02": [100, 10.0, 0.0],
         "TP01": [100.0, 10.0, 1.0],
@@ -40,19 +37,13 @@ def test_build_evaluation_structure_data(test_data_raw: pd.DataFrame):
         "TP03": [100.0, 15.0, 1.0]
     }, index=["Corrected on", "Weight", "Group project"])
 
-    # Build evaluation structure from raw data DataFrame
-    result = __build_evaluation_structure_data(df)
-
-    assert result.equals(expected)
+    return df
 
 
-def test_build_grades_data(test_data_raw: pd.DataFrame):
+@pytest.fixture
+def test_data_expected_grades():
 
-    # Get raw data DataFrame
-    df = test_data_raw
-
-    # Mock expected results DataFrame
-    expected = pd.DataFrame({
+    df = pd.DataFrame({
         "Name": ["John Doe", "Jane Doe", "Invalid Student"],
         "EXAM01": [100.0, 50.0, 0.0],
         "EXAM02": [100.0, 50.0, 0.0],
@@ -64,6 +55,31 @@ def test_build_grades_data(test_data_raw: pd.DataFrame):
         "Average": [100.0, 50.0, 0.0],
         "Grade": ["A+", "C", "E"],
     })
+
+    return df
+
+
+def test_build_evaluation_structure_data(test_data_raw: pd.DataFrame, test_data_expected_structure: pd.DataFrame):
+
+    # Get raw data DataFrame
+    df = test_data_raw
+
+    # Mock expected results DataFrame
+    expected = test_data_expected_structure
+
+    # Build evaluation structure from raw data DataFrame
+    result = __build_evaluation_structure_data(df)
+
+    assert result.equals(expected)
+
+
+def test_build_grades_data(test_data_raw: pd.DataFrame, test_data_expected_grades: pd.DataFrame):
+
+    # Get raw data DataFrame
+    df = test_data_raw
+
+    # Mock expected results DataFrame
+    expected = test_data_expected_grades
 
     # Build evaluation structure from raw data DataFrame (tested separately in test_build_evaluation_structure_data)
     df_structure = __build_evaluation_structure_data(df)
@@ -74,33 +90,12 @@ def test_build_grades_data(test_data_raw: pd.DataFrame):
     assert result.equals(expected)
 
 
-def test_parse_results(test_data_raw: pd.DataFrame):
-
-    expected_structure = pd.DataFrame({
-        "EXAM01": [8.5, 10.0, 0.0],
-        "EXAM02": [100, 10.0, 0.0],
-        "TP01": [100.0, 10.0, 1.0],
-        "FINAL": [100.0, 40.0, 0.0],
-        "TP02": [100.0, 15.0, 1.0],
-        "RAP01": [8.0, 0.0, 0.0],
-        "TP03": [100.0, 15.0, 1.0]
-    }, index=["Corrected on", "Weight", "Group project"])
-
-    expected_grades = pd.DataFrame({
-        "Name": ["John Doe", "Jane Doe", "Invalid Student"],
-        "EXAM01": [100.0, 50.0, 0.0],
-        "EXAM02": [100.0, 50.0, 0.0],
-        "TP01": [100.0, 50.0, 0.0],
-        "FINAL": [100.0, 50.0, 0.0],
-        "TP02": [100.0, 50.0, 0.0],
-        "RAP01": [100.0, 50.0, 0.0],
-        "TP03": [100.0, 50.0, 0.0],
-        "Average": [100.0, 50.0, 0.0],
-        "Grade": ["A+", "C", "E"],
-    })
+def test_parse_results(test_data_raw: pd.DataFrame,
+                       test_data_expected_structure: pd.DataFrame,
+                       test_data_expected_grades: pd.DataFrame):
 
     with patch('pandas.read_csv', return_value=test_data_raw):
         obtained_structure, obtained_grades = parse_results('not_a_filename.csv')
 
-    assert obtained_structure.equals(expected_structure)
-    assert obtained_grades.equals(expected_grades)
+    assert obtained_structure.equals(test_data_expected_structure)
+    assert obtained_grades.equals(test_data_expected_grades)
