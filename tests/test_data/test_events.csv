@@ -1,0 +1,6 @@
+﻿"Heure,""Nom complet"",""Utilisateur concerné"",""Contexte de l'événement"",Composant,""Nom de l'événement"",Description,Origine,""Adresse IP"""
+"2023-01-9, 11:38,""John Doe"",-,""Cours: INF135-02 Introduction à la programmation en génie mécanique (A2022)"",Journaux,""Journal consulté"",""The user with id '1234567' viewed the log report for the course with id '12345'."",web,11.1111.111.11"
+"2023-01-9, 11:37,""Jane Doe"",-,""Cours: INF135-02 Introduction à la programmation en génie mécanique (A2022)"",Système,""Cours consulté"",""The user with id '7654321' viewed the course with id '12345'."",web,22.222.222.22"
+"2023-01-10, 7:12,""John Doe"",-,""Cours: INF135-02 Introduction à la programmation en génie mécanique (A2022)"",Journaux,""Journal consulté"",""The user with id '1234567' viewed the log report for the course with id '12345'."",web,11.1111.111.11"
+"2023-01-11, 12:04,""Jane Doe"",-,""Cours: INF135-02 Introduction à la programmation en génie mécanique (A2022)"",Système,""Cours consulté"",""The user with id '7654321' viewed the course with id '12345'."",web,22.222.222.22"
+"2023-01-12, 08:54,""Invalid Student"",-,""Cours: INF135-02 Introduction à la programmation en génie mécanique (A2022)"",Système,""Cours consulté"",""The user with id '1234' viewed the course with id '12345'."",web,33.333.333.33"
