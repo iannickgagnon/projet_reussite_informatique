@@ -1,0 +1,20 @@
+﻿;;;INF135-02.  Introduction à la programmation en génie mécanique;;;;;;;;;;;;;;;;;
+;;;ProfessorName;;;;;;;;;;;;;;;;;
+;;;Automne 2022;;;;;;;;;;;;;;;;;
+;;;Pour une version PDF, utilisez dans le fichier Excel l'option Fichier|Imprimer et l'imprimante «Microsoft to PDF»;;;;;;;;;;;;;;;;;
+;;;CE FICHIER NE PEUT PAS ÊTRE UTILISÉ POUR IMPORTER DES NOTES;;;;;;;;;;;;;;;;;
+;;;Liste générée le mardi 25 avril 2023 à 15:00:00 par Someone DOE avec l'outil SIGNETS.;;;;;;;;;;;;;;;;;
+;;;;;;;;Évaluation:;intra1;Intra2;TP01;;Final;TP02;;RAP01;;TP03;Note;
+;;;;;;;Nota;#NOM?;8.5;100;100;;100;100;;8;;100;à ce;Cote
+No;Code permanent;Code universel;Nom;Prénom;Programme;Courriel;bene;#NOM?;10;10;10;;40;15;;0;;15;jour;finale
+-;-;-;-;-;-;-;-;-;Note;Note;Note;Équ.;Note;Note;Équ.;Note;Équ.;Note;Note;Cote
+1;DOEJ1234567;AA12345;John;Doe;7684;john.doe@etsmtl.ca;;;8.5;100;100;1;100;100;1;8;;100;100;A+
+2;DOEJ7654321;BB12345;Jane;Doe;7684;jane.doe@etsmtl.ca;;;4.25;50;50;2;50;50;2;4;;50;50;C
+3;STUI;CC12345;Invalid;Student;7684;invalid.student@etsmtl.ca;;;0;0;0;3;0;0;3;0;;0;0;E
+;;;;;;;;Nombre=;3;3;3;;3;3;;3;;3;3;
+;;;;;;;;Absentes=;0;0;0;;0;0;;0;;0;0;
+;;;;;;;;Moyenne=;4;50;50;;50;50;;50;;50;50;
+;;;;;;;;Médiane=;4;50;50;;50;50;;50;;50;50;
+;;;;;;;;Écart-type=;3.3;33.3;33.3;;33.3;33.3;;33.3;;33.3;33.3;
+;;;;;;;;Minimum=;0;0;0;;0;0;;0;;0;0;
+;;;;;;;;Maximum=;8.5;100;100;;100;100;;100;;100;100;
