@@ -14,7 +14,7 @@ from constants import (
 
 
 @pytest.fixture
-def test_data_survey():
+def test_data_expected_survey():
 
     # Generate survey from test data
     test_survey = Survey(filename=PATH_TEST_SURVEY_FROM_TESTS)
@@ -68,39 +68,39 @@ def test_survey_build():
     assert answer_set_2.answers[11] == 'Satisfaisante'
 
 
-def test_survey_get_item(test_data_survey):
+def test_survey_get_item(test_data_expected_survey):
 
     # Test access operator implementation
-    assert isinstance(test_data_survey[0], SurveyAnswers)
+    assert isinstance(test_data_expected_survey[0], SurveyAnswers)
 
 
-def test_survey_del_item(test_data_survey):
+def test_survey_del_item(test_data_expected_survey):
 
     # Delete the first answer set
-    del test_data_survey[0]
+    del test_data_expected_survey[0]
 
     # Check that the right one was deleted
-    assert test_data_survey[0].student_name == 'Jane Doe'
+    assert test_data_expected_survey[0].student_name == 'Jane Doe'
 
     # Check that there is only one out of two answer sets left
-    assert len(test_data_survey) == 1
+    assert len(test_data_expected_survey) == 1
 
 
-def test_survey_iterator(test_data_survey):
+def test_survey_iterator(test_data_expected_survey):
 
     # Expected names
     expected_names = ('John Doe', 'Jane Doe')
 
     # Check that iteration works by looking at the student_name property of the returned elements
-    for answer, expected_name in zip(test_data_survey, expected_names):
+    for answer, expected_name in zip(test_data_expected_survey, expected_names):
         assert answer.student_name == expected_name
 
 
-def test_survey_filter_by_student_name(test_data_survey):
+def test_survey_filter_by_student_name(test_data_expected_survey):
 
     # Filter surveys
-    filtered_survey_1 = test_data_survey.filter_by_student_name('John Doe')
-    filtered_survey_2 = test_data_survey.filter_by_student_name('Jane Doe')
+    filtered_survey_1 = test_data_expected_survey.filter_by_student_name('John Doe')
+    filtered_survey_2 = test_data_expected_survey.filter_by_student_name('Jane Doe')
 
     # Check that a single survey was returned for each
     assert len(filtered_survey_1) == 1
