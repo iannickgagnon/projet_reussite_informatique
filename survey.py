@@ -1,9 +1,13 @@
 
+# External libraries
+from os.path import isfile
+
 # Internal libraries
 from survey_answers import SurveyAnswers
 
 # Internal constants
 from constants import (
+    PATH_SURVEYS,
     SURVEY_NB_QUESTIONS,
     SURVEY_LINE_LENGTH_COMPLETE,
     SURVEY_LINE_ANSWER_Q1,
@@ -57,6 +61,10 @@ class Survey:
        """
 
         # Read data
+
+        if not isfile(filename):
+            filename = PATH_SURVEYS + filename
+
         with open(filename, encoding='utf-8') as file:
             text = file.readlines()
 

@@ -1,7 +1,22 @@
+
+# External libraries
 import pandas as pd
 from typing import Tuple
 from typing import Iterable
 
+# Internal constants
+
+from constants import (
+    PATH_RESULTS,
+    COL_NAME_NAME,
+    COL_NAME_AVERAGE,
+    COL_NAME_GRADE,
+    _100_PERCENT,
+    _0_PERCENT,
+)
+
+
+# TODO: Refactor in consants.py
 _TOKENS_GROUP_PROJECTS = ('TP', 'TRAVAIL', 'PRATIQUE', 'DEV')
 _TOKENS_MIDTERMS = ('INTRA', 'EXAM')
 _TOKENS_FINAL_EXAM = ('FINAL',)
@@ -11,13 +26,6 @@ _INDEX_WEIGHT = 'Weight'
 _INDEX_GROUP_PROJECT = 'Group project'
 
 _COL_INDEX_GRADE = -1
-
-_COL_NAME_NAME = 'Name'
-_COL_NAME_AVERAGE = 'Average'
-_COL_NAME_GRADE = 'Grade'
-
-_100_PERCENT = 100
-_0_PERCENT = 0
 
 _TEAM_FLAG = 'Équ.'
 
@@ -189,7 +197,7 @@ def __remove_rows_of_nans_grades(df: pd.DataFrame) -> pd.DataFrame:
 
     rows_to_remove = []
     for i in range(df.shape[0]):
-        if pd.isna(df[_COL_NAME_AVERAGE].iat[i]):
+        if pd.isna(df[COL_NAME_AVERAGE].iat[i]):
             rows_to_remove.append(i)
     return df.drop(rows_to_remove)
 
@@ -206,7 +214,7 @@ def __standardize_grades_column_names(df: pd.DataFrame, structure_columns: pd.In
         (pd.DataFrame): The standardized grades DataFrame.
     """
 
-    df.columns = pd.Index([_COL_NAME_NAME] + list(structure_columns) + [_COL_NAME_AVERAGE, _COL_NAME_GRADE])
+    df.columns = pd.Index([COL_NAME_NAME] + list(structure_columns) + [COL_NAME_AVERAGE, COL_NAME_GRADE])
     return df
 
 
@@ -301,7 +309,7 @@ def parse_results(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
 
     # Read raw file
-    df_raw = pd.read_csv(filename, sep=';')
+    df_raw = pd.read_csv(PATH_RESULTS + filename, sep=';')
 
     # Extract evaluation structure
     df_structure = __build_evaluation_structure_data(df_raw)

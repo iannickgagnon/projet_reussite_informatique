@@ -13,6 +13,7 @@ from constants import (
     COL_NAME_DATE,
     COL_NAME_TIME,
     COL_NAME_NAME,
+    PATH_EVENTS,
 )
 
 
@@ -31,7 +32,7 @@ def parse_events(filename: str) -> tuple[pd.DataFrame, str, str]:
     """
 
     # Import raw file
-    df = pd.read_csv(filename)
+    df = pd.read_csv(PATH_EVENTS + filename)
 
     # Get course info before removing columns
     course_id = __get_course_id(df)

@@ -12,7 +12,91 @@ from course import Course
 from events_parser import parse_events
 from results_parser import parse_results
 
+
+def analysis_1():
+
+    # Analysis 1 : Individual group
+
+    filename_events = 'logs_S20223-INF135-02_20230109-1138.csv'
+    filename_results = 'INF135_02_20223.csv'
+
+    # Get events data
+    events_data, course_id, semester_id = parse_events(filename_events)
+
+    # Get evaluation structure and grades
+    evaluation_structure, results_data = parse_results(filename_results)
+
+    # TODO : Remove opt-outs
+
+    # Anonymize
+    events_data, results_data = anonymize(events_data, results_data, course_id, semester_id, clean_up=False)
+
+    # Build course
+    course_obj = Course(events_data, results_data, evaluation_structure, course_id, semester_id)
+
+    #course_obj.plot_individual_avg_vs_engagement(normalize=True)
+
+
+def analysis_2():
+
+    # Analysis 2 : Multiple groups individual averages
+    fig, ax = Course.plot_combined_individual_avg_vs_engagement(linear_regression=True)
+
+
+def analysis_3():
+
+    # Analysis 3 : Multiple groups points to pass
+    fig, ax = Course.plot_combined_points_to_pass_vs_engagement(linear_regression=True)
+
+
+def analysis_4():
+
+    # Analysis 4
+    fig, ax = Course.plot_combined_stacked_distributions_pass_fail()
+
+
+def analysis_5():
+
+    '''
+    # Extract courses list
+    courses = Course.build_course_list_from_files()
+
+    with open('mock_courses.pkl', 'wb') as file:
+        pickle.dump(courses, file)
+    '''
+
+    with open('mock_courses.pkl', 'rb') as file:
+        courses = pickle.load(file)
+
+    import numpy as np
+    from sklearn.linear_model import LinearRegression
+
+    slopes = []
+
+    regressor = LinearRegression()
+
+    for course in courses:
+        for student in course.students:
+
+            results = student.get_exam_results().iloc[0]
+
+            regressor.fit(np.arange(len(results)).reshape(-1,1), results)
+
+            slopes.append(regressor.coef_[0])
+
+            #plt.plot(results)
+
+
+    plt.hist(slopes)
+    plt.show()
+
+    pass
+
+
+
 if __name__ == '__main__':
+
+    analysis_2()
 
     #TODO: Add listdir and fix _build_from_list() at the same time
 
@@ -142,82 +226,3 @@ if __name__ == '__main__':
                 print(f'\t\tAbandon - {pct_abandon:.1f}% ({nb_abandon})')
                 print(f'\t\tSuccès  - {pct_succes:.1f}% ({nb_succes})')
                 print(f'\t\tÉchec   - {pct_echec:.1f}% ({nb_echec})\n')
-
-def analysis_1():
-
-    # Analysis 1 : Individual group
-
-    filename_events = 'logs_S20223-INF135-02_20230109-1138.csv'
-    filename_results = 'INF135_02_20223.csv'
-
-    # Get events data
-    events_data, course_id, semester_id = parse_events(filename_events)
-
-    # Get evaluation structure and grades
-    evaluation_structure, results_data = parse_results(filename_results)
-
-    # TODO : Remove opt-outs
-
-    # Anonymize
-    events_data, results_data = anonymize(events_data, results_data, course_id, semester_id, clean_up=False)
-
-    # Build course
-    course_obj = Course(events_data, results_data, evaluation_structure, course_id, semester_id)
-
-    #course_obj.plot_individual_avg_vs_engagement(normalize=True)
-
-
-def analysis_2():
-
-    # Analysis 2 : Multiple groups individual averages
-    fig, ax = Course.plot_combined_individual_avg_vs_engagement(linear_regression=True)
-
-
-def analysis_3():
-
-    # Analysis 3 : Multiple groups points to pass
-    fig, ax = Course.plot_combined_points_to_pass_vs_engagement(linear_regression=True)
-
-
-def analysis_4():
-
-    # Analysis 4
-    fig, ax = Course.plot_combined_stacked_distributions_pass_fail()
-
-
-def analysis_5():
-
-    '''
-    # Extract courses list
-    courses = Course.build_course_list_from_files()
-
-    with open('mock_courses.pkl', 'wb') as file:
-        pickle.dump(courses, file)
-    '''
-
-    with open('mock_courses.pkl', 'rb') as file:
-        courses = pickle.load(file)
-
-    import numpy as np
-    from sklearn.linear_model import LinearRegression
-
-    slopes = []
-
-    regressor = LinearRegression()
-
-    for course in courses:
-        for student in course.students:
-
-            results = student.get_exam_results().iloc[0]
-
-            regressor.fit(np.arange(len(results)).reshape(-1,1), results)
-
-            slopes.append(regressor.coef_[0])
-
-            #plt.plot(results)
-
-
-    plt.hist(slopes)
-    plt.show()
-
-    pass

@@ -39,7 +39,6 @@ from constants import (
 )
 
 
-
 class Course:
     """
     A class representing a course.
@@ -161,7 +160,7 @@ class Course:
             self.students.append(Student(name, events, results))
 
             # Calculate student's averages
-            self._student_calculate_averages(self.students[LAST_ELEMENT_INDEX])
+            self.__student_calculate_averages(self.students[LAST_ELEMENT_INDEX])
             self.students[LAST_ELEMENT_INDEX].overall_average = results[COL_NAME_AVERAGE].iloc[0]
 
             # Store student's letter grades
@@ -357,7 +356,7 @@ class Course:
             # Find corresponding events file
             try:
                 i = 0
-                while not ((course_tag + '-') in filenames_events[i] and ('-' + group_tag) in filenames_events[i]):
+                while not ((course_tag + '_') in filenames_events[i] and ('_' + group_tag) in filenames_events[i]):
                     i += 1
             except IndexError:
                 raise IndexError(f'Could not find events file for {course_tag}-{group_tag}')
