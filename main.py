@@ -159,55 +159,14 @@ def analysis_3():
     fig, ax = Course.plot_combined_points_to_pass_vs_engagement(is_linear_regression=True)
 
 
-
-
-
-
-
-
-
 def analysis_4():
+    '''
+    Plots the stacked histograms of failures and successes distributions.
+    '''
 
-    # Analysis 4
     fig, ax = Course.plot_combined_stacked_distributions_pass_fail()
 
 
-def analysis_5():
-
-    '''
-    # Extract courses list
-    courses = Course.build_course_list_from_files()
-
-    with open('mock_courses.pkl', 'wb') as file:
-        pickle.dump(courses, file)
-    '''
-
-    with open('mock_courses.pkl', 'rb') as file:
-        courses = pickle.load(file)
-
-    import numpy as np
-    from sklearn.linear_model import LinearRegression
-
-    slopes = []
-
-    regressor = LinearRegression()
-
-    for course in courses:
-        for student in course.students:
-
-            results = student.get_exam_results().iloc[0]
-
-            regressor.fit(np.arange(len(results)).reshape(-1,1), results)
-
-            slopes.append(regressor.coef_[0])
-
-            #plt.plot(results)
-
-
-    plt.hist(slopes)
-    plt.show()
-
-    pass
 
 
 
@@ -220,6 +179,9 @@ if __name__ == '__main__':
     #analysis_2()
 
     #analysis_3()
+
+    analysis_4()
+
 
     #TODO: Add listdir and fix _build_from_list() at the same time
     course_identifiers = ('INF111', 'INF130', 'INF135', 'INF147', 'INF155')

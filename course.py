@@ -356,7 +356,7 @@ class Course:
 
             # Build histogram
             _, bins, _ = ax.hist(averages,
-                                 color='lightsteelblue',
+                                 color='royalblue',
                                  edgecolor='k',
                                  density=1)
 
@@ -406,7 +406,7 @@ class Course:
 
             # Build histogram
             _, bins, _ = ax.hist(engagement,
-                                 color='lightsteelblue',
+                                 color='royalblue',
                                  edgecolor='k',
                                  density=1)
 
@@ -740,7 +740,12 @@ class Course:
         """
 
         # Extract courses list
-        courses = Course.build_course_list_from_files()
+        #courses = Course.build_course_list_from_files()
+
+        # TODO: Remove
+        import pickle
+        with open('courses.pkl', 'rb') as file:
+            courses = pickle.load(file)
 
         # Split failures from successes
         averages_pass, nb_events_pass, averages_fail, nb_events_fail = Course.split_courses_fail_pass(courses)
@@ -755,23 +760,13 @@ class Course:
 
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+            # Create figure and axes
             fig, ax = plt.subplots()
-            counts_all, _, _ = ax.hist(nb_events_all, color='blue', **PLOT_HISTOGRAM_CONFIG)
-            counts_fail, _, _ = ax.hist(nb_events_fail, color='red', **PLOT_HISTOGRAM_CONFIG)
 
-        # TODO: Add confidence intervals
-
-        '''
-        # Count the number of passes
-        counts_pass = counts_all - counts_fail
-        
-        fail_ratios = np.round(
-            np.divide(counts_fail, counts_all, out=np.zeros_like(counts_fail), where=counts_all != 0) * 100, 1)
-
-        print(counts_pass)
-        print(counts_fail)
-        print(fail_ratios)
-        '''
+            # Create histograms
+            counts_all, _, _ = ax.hist(nb_events_all, color='royalblue', **PLOT_HISTOGRAM_CONFIG)
+            counts_fail, _, _ = ax.hist(nb_events_fail, color='indianred', **PLOT_HISTOGRAM_CONFIG)
 
         # Labels
         plt.xlabel(PLOT_X_LABEL_ENGAGEMENT)
@@ -780,8 +775,10 @@ class Course:
         # Add legend
         plt.legend(['Pass', 'Fail'])
 
+        # Show plot
         plt.show()
 
+        # Export figure and axes
         return fig, ax
 
     @staticmethod
