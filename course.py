@@ -7,7 +7,6 @@ from typing import Tuple
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
-from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression
 
 # Internal libraries
@@ -335,7 +334,6 @@ class Course:
             # Export figure and axes
             return fig, ax
 
-
     def plot_individual_avg_distribution(self):
         """
         Builds a histogram of individual averages.
@@ -384,7 +382,6 @@ class Course:
 
             # Export figure and axes
             return fig, ax
-
 
     def plot_engagement_distribution(self):
         """
@@ -435,11 +432,6 @@ class Course:
             # Export figure and axes
             return fig, ax
 
-
-    def filter_by_course(self, course_id: str):
-        #TODO: Complete
-        pass
-
     @staticmethod
     def build_course_list_from_files(path_events_files: str = PATH_EVENTS,
                                      path_results_files: str = PATH_RESULTS,
@@ -455,7 +447,6 @@ class Course:
         Returns:
               List[Course]: A list of Course objects built from the provided files.
     """
-
 
         # Get file names
         filenames_events = os.listdir(path_events_files)
@@ -550,7 +541,7 @@ class Course:
         with passing and failing students plotted separately.
 
         Args:
-            is_linear_regression (bool): Whether to plot a linear regression line for the failing students. Defaults to False.
+            is_linear_regression (bool): Whether to plot regression line for failures. Defaults to False.
             is_plot_successes (bool): Whether to plot students who succeeded. Defaults to True.
             is_plot_failures (bool): Whether to plot students who failed. Defaults to True.
 
@@ -666,7 +657,7 @@ class Course:
         Plots a scatter plot of the number of points missing to pass vs engagement vector for failing students.
 
         Args:
-            is_linear_regression (bool): Whether to plot a linear regression line for the number of points missing to pass.
+            is_linear_regression (bool): Whether to plot regression line for the number of points missing to pass.
 
         Returns:
             (Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]): The figure and axes objects of the plot.
@@ -780,45 +771,3 @@ class Course:
 
         # Export figure and axes
         return fig, ax
-
-    @staticmethod
-    def letter_grade_to_points(grade: str) -> float:
-        """
-        Convert a letter grade to a point value.
-
-        Args:
-            grade (str): A string representing the letter grade.
-
-        Returns:
-            (float): The equivalent point value.
-
-        Raises:
-            ValueError: If the input grade is not a valid letter grade.
-        """
-
-        if grade == 'A+':
-            return 4.3
-        elif grade == 'A':
-            return 4.0
-        elif grade == 'A-':
-            return 3.7
-        elif grade == 'B+':
-            return 3.3
-        elif grade == 'B':
-            return 3.0
-        elif grade == 'B-':
-            return 2.7
-        elif grade == 'C+':
-            return 2.3
-        elif grade == 'C':
-            return 2.0
-        elif grade == 'C-':
-            return 1.7
-        elif grade == 'D+':
-            return 1.3
-        elif grade == 'D':
-            return 1.0
-        elif grade == 'E':
-            return 0.0
-        else:
-            raise ValueError(f'Invalid grade ({grade})')

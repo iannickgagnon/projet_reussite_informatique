@@ -16,9 +16,9 @@ from results_parser import parse_results
 def analysis_1_a(filename: str,
                  is_anonymize: bool = False,
                  is_regression: bool = False):
-    '''
+    """
     Plots a given course's average grades against engagement with or without a regression line.
-    '''
+    """
 
     # Get events data
     events_data, course_id, semester_id = parse_events(filename)
@@ -56,12 +56,15 @@ def analysis_1_a(filename: str,
     fig, ax = course_obj.plot_individual_avg_vs_engagement(normalize=True,
                                                            linear_regression=is_regression)
 
+    # Export figure and axes
+    return fig, ax
+
 
 def analysis_1_b(filename: str,
                  is_anonymize: bool = False):
-    '''
+    """
     Plots a given course's average grades distribution.
-    '''
+    """
 
     # Get events data
     events_data, course_id, semester_id = parse_events(filename)
@@ -98,12 +101,15 @@ def analysis_1_b(filename: str,
     # Build and show plot
     fig, ax = course_obj.plot_individual_avg_distribution()
 
+    # Export figure and axes
+    return fig, ax
+
 
 def analysis_1_c(filename: str,
                  is_anonymize: bool = False):
-    '''
+    """
     Plots a given course's average engagement distribution.
-    '''
+    """
 
     # Get events data
     events_data, course_id, semester_id = parse_events(filename)
@@ -140,34 +146,43 @@ def analysis_1_c(filename: str,
     # Build and show plot
     fig, ax = course_obj.plot_engagement_distribution()
 
+    # Export figure and axes
+    return fig, ax
+
 
 def analysis_2():
-    '''
+    """
     Plots a list of courses' individual averages against engagement.
-    '''
+    """
 
     fig, ax = Course.plot_combined_individual_avg_vs_engagement(is_linear_regression=True,
                                                                 is_plot_successes=False,
                                                                 is_plot_failures=True)
 
+    # Export figure and axes
+    return fig, ax
+
 
 def analysis_3():
-    '''
+    """
     Plots the number of points missing to go from failure to success.
-    '''
+    """
 
     fig, ax = Course.plot_combined_points_to_pass_vs_engagement(is_linear_regression=True)
 
+    # Export figure and axes
+    return fig, ax
+
 
 def analysis_4():
-    '''
+    """
     Plots the stacked histograms of failures and successes distributions.
-    '''
+    """
 
     fig, ax = Course.plot_combined_stacked_distributions_pass_fail()
 
-
-
+    # Export figure and axes
+    return fig, ax
 
 
 if __name__ == '__main__':
@@ -179,15 +194,10 @@ if __name__ == '__main__':
     #analysis_3()
     #analysis_4()
 
-
     #TODO: Add listdir and fix _build_from_list() at the same time
     course_identifiers = ('INF111', 'INF130', 'INF135', 'INF147', 'INF155')
 
-
-
-
     '''
-
     # Build courses container (dict)
     courses = {course_id:[] for course_id in course_identifiers}
 
@@ -239,22 +249,22 @@ if __name__ == '__main__':
     with open('courses_dict.pkl', 'rb') as file:
         courses = pickle.load(file)
 
-    OUTCOMES = {outcome:0 for outcome in ('Abandon', 'Succès', 'Échec')}
+    OUTCOMES = {outcome: 0 for outcome in ('Abandon', 'Succès', 'Échec')}
 
-    YES_NO = {'Oui':OUTCOMES.copy(),
-              'Non':OUTCOMES.copy()}
+    YES_NO = {'Oui': OUTCOMES.copy(),
+              'Non': OUTCOMES.copy()}
 
-    EMPLOI_ETE = {'Études seulement':OUTCOMES.copy(),
-                  'Travail seulement':OUTCOMES.copy(),
-                  'Études et travail':OUTCOMES.copy()}
+    EMPLOI_ETE = {'Études seulement': OUTCOMES.copy(),
+                  'Travail seulement': OUTCOMES.copy(),
+                  'Études et travail': OUTCOMES.copy()}
 
-    LANGUE = {'Français':OUTCOMES.copy(),
-              'Anglais':OUTCOMES.copy(),
-              'Autre':OUTCOMES.copy()}
+    LANGUE = {'Français': OUTCOMES.copy(),
+              'Anglais': OUTCOMES.copy(),
+              'Autre': OUTCOMES.copy()}
 
-    SITUATION_FINANCIERE = {'Aisée':OUTCOMES.copy(),
-                            'Satisfaisante':OUTCOMES.copy(),
-                            'Précaire':OUTCOMES.copy()}
+    SITUATION_FINANCIERE = {'Aisée': OUTCOMES.copy(),
+                            'Satisfaisante': OUTCOMES.copy(),
+                            'Précaire': OUTCOMES.copy()}
 
     questions_and_outcomes = {0: deepcopy(YES_NO),
                               1: deepcopy(YES_NO),
@@ -282,7 +292,6 @@ if __name__ == '__main__':
                             questions_and_outcomes[question_index].append(answers[question_index])
                         else:
                             questions_and_outcomes[question_index][answer][student.get_outcome()] += 1
-
 
     # Print results
     nb_responses = len(questions_and_outcomes[6])
