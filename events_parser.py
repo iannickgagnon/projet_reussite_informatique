@@ -2,6 +2,7 @@
 # External libraries
 import re
 import pandas as pd
+from os.path import isfile
 
 # Internal constants
 from constants import (
@@ -31,8 +32,12 @@ def parse_events(filename: str) -> tuple[pd.DataFrame, str, str]:
             - semester (str): The semester extracted from the context string in the first row of the DataFrame.
     """
 
+    # Adjust filename
+    if not isfile(filename):
+        filename = PATH_EVENTS + filename
+
     # Import raw file
-    df = pd.read_csv(PATH_EVENTS + filename)
+    df = pd.read_csv(filename)
 
     # Get course info before removing columns
     course_id = __get_course_id(df)

@@ -2,10 +2,10 @@
 # External libraries
 import pandas as pd
 from typing import Tuple
+from os.path import isfile
 from typing import Iterable
 
 # Internal constants
-
 from constants import (
     PATH_RESULTS,
     COL_NAME_NAME,
@@ -308,8 +308,12 @@ def parse_results(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         AssertionError: If the sum of the evaluation weights is not equal to 100.
     """
 
+    # Adjust filename
+    if not isfile(filename):
+        filename = PATH_RESULTS + filename
+
     # Read raw file
-    df_raw = pd.read_csv(PATH_RESULTS + filename, sep=';')
+    df_raw = pd.read_csv(filename, sep=';')
 
     # Extract evaluation structure
     df_structure = __build_evaluation_structure_data(df_raw)

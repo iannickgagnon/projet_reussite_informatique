@@ -175,12 +175,9 @@ if __name__ == '__main__':
     #analysis_1_a('INF135_02.csv')
     #analysis_1_b('INF135_02.csv')
     #analysis_1_c('INF135_02.csv')
-
     #analysis_2()
-
     #analysis_3()
-
-    analysis_4()
+    #analysis_4()
 
 
     #TODO: Add listdir and fix _build_from_list() at the same time

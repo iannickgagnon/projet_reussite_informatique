@@ -60,16 +60,15 @@ class Survey:
            filename (str): The name of the CSV file containing the survey data.
        """
 
-        # Read data
-
+        # Adjust filename
         if not isfile(filename):
             filename = PATH_SURVEYS + filename
 
+        # Read data
         with open(filename, encoding='utf-8') as file:
             text = file.readlines()
 
         # Parse lines except header
-
         for ligne in text[1:]:
 
             # Split current line
