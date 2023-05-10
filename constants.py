@@ -80,6 +80,7 @@ TIMESTAMP_TOKENS_TO_REPLACE = ' .:-'
 # Percentages
 _0_PERCENT = 0.0
 _100_PERCENT = 100.0
+_50_PERCENT = 50.0
 
 # Minimum grade to pass
 PASSING_GRADE = 50.0
@@ -97,6 +98,7 @@ LAST_ELEMENT_INDEX = -1
 PLOT_X_LABEL_ENGAGEMENT = 'Engagement'
 PLOT_Y_LABEL_INDIVIDUAL_AVERAGE = 'Individual average [%]'
 PLOT_Y_LABEL_COUNT = 'Count'
+PLOT_LABEL_FREQUENCY = 'Frequency'
 
 # Plot border margins
 PLOT_BORDER_MARGIN_FACTOR = 1.1

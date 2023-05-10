@@ -51,10 +51,11 @@ def anonymize(course_id: str,
     events[COL_NAME_NAME].replace(to_replace=names_dict, inplace=True)
     results[COL_NAME_NAME].replace(to_replace=names_dict, inplace=True)
 
-    for name in names_dict:
-        corresponding_survey = surveys.filter_by_student_name(name)
-        if corresponding_survey is not None:
-            corresponding_survey[0].student_name = names_dict[name]
+    if surveys is not None:
+        for name in names_dict:
+            corresponding_survey = surveys.filter_by_student_name(name)
+            if corresponding_survey is not None:
+                corresponding_survey[0].student_name = names_dict[name]
 
     # Remove entries that could not be anonymized
     if clean_up:
@@ -76,6 +77,9 @@ def __clean_up(prefix, events=None, results=None, surveys=None):
     Returns:
         Tuple[DataFrame, DataFrame, Survey]: Tuple containing the cleaned events, results, and Survey.
     """
+
+    # Make sure surveys data exists
+    assert surveys is not None, 'Surveys data is missing to remove non-participants'
 
     # Filter surveys
     surveys = [s for s in surveys if prefix in s.student_name]

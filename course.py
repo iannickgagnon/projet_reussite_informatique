@@ -3,7 +3,11 @@
 import os
 import numpy as np
 import pandas as pd
+from typing import Tuple
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+from scipy.optimize import curve_fit
 from sklearn.linear_model import LinearRegression
 
 # Internal libraries
@@ -17,6 +21,7 @@ from results_parser import parse_results
 from constants import (
     _0_PERCENT,
     _100_PERCENT,
+    _50_PERCENT,
     _0_EVENTS,
     COL_NAME_NAME,
     COL_NAME_AVERAGE,
@@ -33,6 +38,7 @@ from constants import (
     PLOT_X_LABEL_ENGAGEMENT,
     PLOT_Y_LABEL_INDIVIDUAL_AVERAGE,
     PLOT_Y_LABEL_COUNT,
+    PLOT_LABEL_FREQUENCY,
     PLOT_BORDER_MARGIN_FACTOR,
     PLOT_BORDER_MARGIN_FACTOR_SMALL,
     PLOT_HISTOGRAM_CONFIG,
@@ -107,7 +113,7 @@ class Course:
                  semester_id: str,
                  events: pd.DataFrame,
                  results: pd.DataFrame,
-                 surveys: survey.Survey) -> None:
+                 surveys: survey.Survey = None) -> None:
         """
         Initializes a new instance of the Course class.
 
@@ -117,7 +123,7 @@ class Course:
             semester_id (str): The ID of the semester the course is taught in.
             events (DataFrame): The events associated with the course.
             results (DataFrame): The results of the course.
-            surveys (survey.Survey): The survey responses for the course.
+            surveys (survey.Survey, optional): The survey responses for the course. Defaults to None.
         """
 
         # Store raw data
@@ -294,15 +300,21 @@ class Course:
 
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+            # Create figure and axes
             fig, ax = plt.subplots()
+
+            # Add scatterplot
             ax.scatter(nb_events, average, color='blue')
 
+            # Add linear regression
             if linear_regression:
+
                 # Create model
                 model = LinearRegression()
                 model.fit(np.array(nb_events).reshape(-1, 1), average)
 
-                # Model output
+                # Get model output
                 x_regression = np.linspace(0, 1, 2)
                 y_regression = model.predict(x_regression[:, np.newaxis])
 
@@ -317,9 +329,112 @@ class Course:
             plt.xlim(_0_EVENTS, max(nb_events) * PLOT_BORDER_MARGIN_FACTOR)
             plt.ylim(_0_PERCENT, _100_PERCENT)
 
+            # Show plot
             plt.show()
 
+            # Export figure and axes
             return fig, ax
+
+
+    def plot_individual_avg_distribution(self):
+        """
+        Builds a histogram of individual averages.
+
+        Args:
+            None.
+
+        Returns:
+            (Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]): The figure and axes objects of the plot.
+        """
+
+        # Get events counts and individual average
+        averages = self.__get_individual_avg_vector()
+
+        # Plot
+        with plt.style.context(PATH_MAIN_PLOT_STYLE):
+            fig, ax = plt.subplots()
+
+            # Build histogram
+            _, bins, _ = ax.hist(averages,
+                                 color='lightsteelblue',
+                                 edgecolor='k',
+                                 density=1)
+
+            # Add density estimate
+            density = gaussian_kde(averages)
+            density_x = np.linspace(bins[0], bins[-1], 50)
+            density_y = density.evaluate(density_x)
+            ax.plot(density_x, density_y, '--r')
+
+            # Show corresponding normal distributions
+            mu = np.mean(averages)
+            sigma = np.std(averages)
+            y_normal = ((1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-0.5 * (1 / sigma * (bins - mu)) ** 2))
+            ax.plot(bins, y_normal, '--', color='k')
+
+            # Labels
+            plt.xlabel(PLOT_Y_LABEL_INDIVIDUAL_AVERAGE)
+            plt.ylabel(PLOT_LABEL_FREQUENCY)
+
+            # Add legend
+            plt.legend(('Density est.', 'Normal ref.'))
+
+            # Show plot
+            plt.show()
+
+            # Export figure and axes
+            return fig, ax
+
+
+    def plot_engagement_distribution(self):
+        """
+        Builds a histogram of individual averages.
+
+        Args:
+            None.
+
+        Returns:
+            (Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]): The figure and axes objects of the plot.
+        """
+
+        # Get events counts and individual average
+        engagement = self.__get_engagement_vector()
+
+        # Plot
+        with plt.style.context(PATH_MAIN_PLOT_STYLE):
+            fig, ax = plt.subplots()
+
+            # Build histogram
+            _, bins, _ = ax.hist(engagement,
+                                 color='lightsteelblue',
+                                 edgecolor='k',
+                                 density=1)
+
+            # Add density estimate
+            density = gaussian_kde(engagement)
+            density_x = np.linspace(bins[0], bins[-1], 50)
+            density_y = density.evaluate(density_x)
+            ax.plot(density_x, density_y, '--r')
+
+            # Show corresponding normal distributions
+            mu = np.mean(engagement)
+            sigma = np.std(engagement)
+            y_normal = ((1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-0.5 * (1 / sigma * (bins - mu)) ** 2))
+            ax.plot(bins, y_normal, '--', color='k')
+
+            # Labels
+            plt.xlabel(PLOT_X_LABEL_ENGAGEMENT)
+            plt.ylabel(PLOT_LABEL_FREQUENCY)
+
+            # Add legend
+            plt.legend(('Density est.', 'Normal ref.'))
+
+            # Show plot
+            plt.show()
+
+            # Export figure and axes
+            return fig, ax
+
 
     def filter_by_course(self, course_id: str):
         #TODO: Complete
@@ -426,20 +541,33 @@ class Course:
         return averages_pass, nb_events_pass, averages_fail, nb_events_fail
 
     @staticmethod
-    def plot_combined_individual_avg_vs_engagement(linear_regression=False):
+    def plot_combined_individual_avg_vs_engagement(is_linear_regression: bool = False,
+                                                   is_plot_successes: bool = True,
+                                                   is_plot_failures: bool = True) \
+            -> Tuple[mpl.figure.Figure, mpl.axes.Axes]:
         """
         Plots a combined scatter plot of the individual average vs engagement vector for all courses,
         with passing and failing students plotted separately.
 
         Args:
-            linear_regression (bool): Whether to plot a linear regression line for the failing students.
+            is_linear_regression (bool): Whether to plot a linear regression line for the failing students. Defaults to False.
+            is_plot_successes (bool): Whether to plot students who succeeded. Defaults to True.
+            is_plot_failures (bool): Whether to plot students who failed. Defaults to True.
 
         Returns:
             (Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]): The figure and axes objects of the plot.
         """
 
+        # Make sure there is something to plot
+        assert is_plot_successes or is_plot_failures, 'Must plot either successes, failures or both'
+
         # Build course list
-        course_list = Course.build_course_list_from_files()
+        # course_list = Course.build_course_list_from_files()
+
+        # TODO: Remove
+        import pickle
+        with open('courses.pkl', 'rb') as file:
+            course_list = pickle.load(file)
 
         # Split failures and successes
         averages_success, nb_events_success, averages_fail, nb_events_fail = \
@@ -448,59 +576,109 @@ class Course:
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
 
+            # Create figure and axes
             fig, ax = plt.subplots()
-            ax.scatter(nb_events_success, averages_success, color='blue', s=4)
-            ax.scatter(nb_events_fail, averages_fail, color='red', s=4)
+
+            # Plot successes
+            if is_plot_successes:
+                ax.scatter(nb_events_success, averages_success, color='royalblue', s=4)
+
+            # Plot failures
+            if is_plot_failures:
+                ax.scatter(nb_events_fail, averages_fail, color='indianred', s=4)
+
+            # Build data vectors based on regression options
+            if is_plot_successes and is_plot_failures:
+                # Combine failures and successes
+                nb_events_fail.extend(nb_events_success)
+                averages_fail.extend(averages_success)
+                data_x = np.array(nb_events_fail).reshape(-1, 1)
+                data_y = np.array(averages_fail).reshape(-1, 1)
+            elif is_plot_successes:
+                data_x = np.array(nb_events_success).reshape(-1, 1)
+                data_y = np.array(averages_success).reshape(-1, 1)
+            else:
+                data_x = np.array(nb_events_fail).reshape(-1, 1)
+                data_y = np.array(averages_fail).reshape(-1, 1)
 
             # Linear regression for failures
-            if linear_regression:
+            if is_linear_regression:
 
                 # Create model
                 model = LinearRegression()
-                model.fit(np.array(nb_events_fail).reshape(-1, 1), averages_fail)
+                model.loss = 'mae'
+
+                # Fit model to data
+                model.fit(data_x, data_y)
 
                 # Find min/max for x-axis
                 x_min = nb_events_fail[np.argmin(nb_events_fail)]
                 x_max = nb_events_fail[np.argmax(nb_events_fail)]
 
                 # Model output
-                x_regression = np.linspace(x_min, x_max, 2)
+                x_regression = np.linspace(x_min, x_max, 100)
                 y_regression = model.predict(x_regression[:, np.newaxis])
 
                 # Add to plot
                 ax.plot(x_regression, y_regression, 'k--')
 
-                plt.legend(['Pass', 'Fail', 'Regression (Fail)'], loc='lower right')
+            # Labels
+            plt.xlabel(PLOT_X_LABEL_ENGAGEMENT)
+            plt.ylabel(PLOT_Y_LABEL_INDIVIDUAL_AVERAGE)
 
+            # Limits
+            plt.xlim(_0_EVENTS, max(nb_events_success + nb_events_fail) * PLOT_BORDER_MARGIN_FACTOR_SMALL)
+
+            if is_plot_successes and is_plot_failures:
+                # Vertical axis ranges from 0 to 100 when both successes and failures are plotted
+                plt.ylim(_0_PERCENT, _100_PERCENT * PLOT_BORDER_MARGIN_FACTOR_SMALL)
+                legend_items = ['Pass', 'Fail']
+            elif is_plot_successes:
+                # Vertical axis ranges from 50 to 100 when only successes are plotted
+                plt.ylim(_50_PERCENT, _100_PERCENT * PLOT_BORDER_MARGIN_FACTOR_SMALL)
+                legend_items = ['Pass']
             else:
-                plt.legend(['Pass', 'Fail'], loc='lower right')
+                # Vertical axis ranges from 0 to 50 when only failures are plotted
+                plt.ylim(_0_PERCENT, _50_PERCENT * PLOT_BORDER_MARGIN_FACTOR_SMALL)
+                legend_items = ['Fail']
 
-        # Labels
-        plt.xlabel(PLOT_X_LABEL_ENGAGEMENT)
-        plt.ylabel(PLOT_Y_LABEL_INDIVIDUAL_AVERAGE)
+            # Specify MAE regression in title
+            if is_linear_regression:
+                plt.title('Linear regression using Mean Absolute Error')
 
-        # Limits
-        plt.xlim(_0_EVENTS, max(nb_events_success + nb_events_fail) * PLOT_BORDER_MARGIN_FACTOR_SMALL)
-        plt.ylim(_0_PERCENT, _100_PERCENT)
+            # Add legend
+            plt.legend(legend_items, loc='upper left')
 
+        # Show plot
         plt.show()
 
+        # Print coefficients if regression is done
+        if is_linear_regression:
+            print(f'Slope     : {model.coef_[0][0]:.2f}')
+            print(f'Intercept : {model.intercept_[0]:.2f}')
+
+        # Export figure and axes
         return fig, ax
 
     @staticmethod
-    def plot_combined_points_to_pass_vs_engagement(linear_regression=False):
+    def plot_combined_points_to_pass_vs_engagement(is_linear_regression=False):
         """
         Plots a scatter plot of the number of points missing to pass vs engagement vector for failing students.
 
         Args:
-            linear_regression (bool): Whether to plot a linear regression line for the number of points missing to pass.
+            is_linear_regression (bool): Whether to plot a linear regression line for the number of points missing to pass.
 
         Returns:
             (Tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]): The figure and axes objects of the plot.
         """
 
         # Extract courses list
-        courses = Course.build_course_list_from_files()
+        #courses = Course.build_course_list_from_files()
+
+        # TODO: Remove
+        import pickle
+        with open('courses.pkl', 'rb') as file:
+            courses = pickle.load(file)
 
         # Split failures from successes
         averages_pass, nb_events_pass, averages_fail, nb_events_fail = Course.split_courses_fail_pass(courses)
@@ -510,12 +688,20 @@ class Course:
 
         # Plot
         with plt.style.context('./images/main_plot_style.mplstyle'):
+
+            # Create figure and axes
             fig, ax = plt.subplots()
+
+            # Build scatterplot
             ax.scatter(nb_events_fail, delta_to_pass, color='blue', label='_nolegend_')
 
-            if linear_regression:
+            if is_linear_regression:
+
                 # Create model
                 model = LinearRegression()
+                model.loss = 'mae'
+
+                # Fit model to data
                 model.fit(np.array(nb_events_fail).reshape(-1, 1), delta_to_pass)
 
                 # Model output
@@ -525,9 +711,6 @@ class Course:
                 # Add to plot
                 ax.plot(x_regression, y_regression, 'k--')
 
-                # Add legend
-                plt.legend(['Regression'])
-
         # Labels
         plt.xlabel('Engagement')
         plt.ylabel('Points to pass')
@@ -536,8 +719,15 @@ class Course:
         plt.xlim(0, max(nb_events_fail))
         plt.ylim(-1, PASSING_GRADE + 1)
 
+        # Show plot
         plt.show()
 
+        # Print coefficients if regression is done
+        if is_linear_regression:
+            print(f'Slope     : {model.coef_[0]:.2f}')
+            print(f'Intercept : {model.intercept_:.2f}')
+
+        # Export figure and axes
         return fig, ax
 
     @staticmethod

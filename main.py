@@ -3,50 +3,167 @@
 import pickle
 from copy import deepcopy
 from statistics import mean
-
 import matplotlib.pyplot as plt
 
 # Internal libraries
-from anonymizer import anonymize
+from survey import Survey
 from course import Course
+from anonymizer import anonymize
 from events_parser import parse_events
 from results_parser import parse_results
 
 
-def analysis_1():
-
-    # Analysis 1 : Individual group
-
-    filename_events = 'logs_S20223-INF135-02_20230109-1138.csv'
-    filename_results = 'INF135_02_20223.csv'
+def analysis_1_a(filename: str,
+                 is_anonymize: bool = False,
+                 is_regression: bool = False):
+    '''
+    Plots a given course's average grades against engagement with or without a regression line.
+    '''
 
     # Get events data
-    events_data, course_id, semester_id = parse_events(filename_events)
+    events_data, course_id, semester_id = parse_events(filename)
 
     # Get evaluation structure and grades
-    evaluation_structure, results_data = parse_results(filename_results)
-
-    # TODO : Remove opt-outs
+    evaluation_structure, results_data = parse_results(filename)
 
     # Anonymize
-    events_data, results_data = anonymize(events_data, results_data, course_id, semester_id, clean_up=False)
+    if is_anonymize:
+
+        # Get surveys data
+        surveys_data = Survey(filename)
+
+        # Invoke anonymizer
+        events_data, results_data, surveys_data = anonymize(course_id,
+                                                            semester_id,
+                                                            events_data,
+                                                            results_data,
+                                                            surveys_data,
+                                                            clean_up=False)
+    else:
+
+        # Surveys data is not required if data is not anonymized
+        surveys_data = None
 
     # Build course
-    course_obj = Course(events_data, results_data, evaluation_structure, course_id, semester_id)
+    course_obj = Course(evaluation_structure,
+                        course_id,
+                        semester_id,
+                        events_data,
+                        results_data,
+                        surveys_data)
 
-    #course_obj.plot_individual_avg_vs_engagement(normalize=True)
+    # Build and show plot
+    fig, ax = course_obj.plot_individual_avg_vs_engagement(normalize=True,
+                                                           linear_regression=is_regression)
+
+
+def analysis_1_b(filename: str,
+                 is_anonymize: bool = False):
+    '''
+    Plots a given course's average grades distribution.
+    '''
+
+    # Get events data
+    events_data, course_id, semester_id = parse_events(filename)
+
+    # Get evaluation structure and grades
+    evaluation_structure, results_data = parse_results(filename)
+
+    # Anonymize
+    if is_anonymize:
+
+        # Get surveys data
+        surveys_data = Survey(filename)
+
+        # Invoke anonymizer
+        events_data, results_data, surveys_data = anonymize(course_id,
+                                                            semester_id,
+                                                            events_data,
+                                                            results_data,
+                                                            surveys_data,
+                                                            clean_up=False)
+    else:
+
+        # Surveys data is not required if data is not anonymized
+        surveys_data = None
+
+    # Build course
+    course_obj = Course(evaluation_structure,
+                        course_id,
+                        semester_id,
+                        events_data,
+                        results_data,
+                        surveys_data)
+
+    # Build and show plot
+    fig, ax = course_obj.plot_individual_avg_distribution()
+
+
+def analysis_1_c(filename: str,
+                 is_anonymize: bool = False):
+    '''
+    Plots a given course's average engagement distribution.
+    '''
+
+    # Get events data
+    events_data, course_id, semester_id = parse_events(filename)
+
+    # Get evaluation structure and grades
+    evaluation_structure, results_data = parse_results(filename)
+
+    # Anonymize
+    if is_anonymize:
+
+        # Get surveys data
+        surveys_data = Survey(filename)
+
+        # Invoke anonymizer
+        events_data, results_data, surveys_data = anonymize(course_id,
+                                                            semester_id,
+                                                            events_data,
+                                                            results_data,
+                                                            surveys_data,
+                                                            clean_up=False)
+    else:
+
+        # Surveys data is not required if data is not anonymized
+        surveys_data = None
+
+    # Build course
+    course_obj = Course(evaluation_structure,
+                        course_id,
+                        semester_id,
+                        events_data,
+                        results_data,
+                        surveys_data)
+
+    # Build and show plot
+    fig, ax = course_obj.plot_engagement_distribution()
 
 
 def analysis_2():
+    '''
+    Plots a list of courses' individual averages against engagement.
+    '''
 
-    # Analysis 2 : Multiple groups individual averages
-    fig, ax = Course.plot_combined_individual_avg_vs_engagement(linear_regression=True)
+    fig, ax = Course.plot_combined_individual_avg_vs_engagement(is_linear_regression=True,
+                                                                is_plot_successes=False,
+                                                                is_plot_failures=True)
 
 
 def analysis_3():
+    '''
+    Plots the number of points missing to go from failure to success.
+    '''
 
-    # Analysis 3 : Multiple groups points to pass
-    fig, ax = Course.plot_combined_points_to_pass_vs_engagement(linear_regression=True)
+    fig, ax = Course.plot_combined_points_to_pass_vs_engagement(is_linear_regression=True)
+
+
+
+
+
+
+
 
 
 def analysis_4():
@@ -96,11 +213,19 @@ def analysis_5():
 
 if __name__ == '__main__':
 
-    analysis_2()
+    #analysis_1_a('INF135_02.csv')
+    #analysis_1_b('INF135_02.csv')
+    #analysis_1_c('INF135_02.csv')
+
+    #analysis_2()
+
+    #analysis_3()
 
     #TODO: Add listdir and fix _build_from_list() at the same time
-
     course_identifiers = ('INF111', 'INF130', 'INF135', 'INF147', 'INF155')
+
+
+
 
     '''
 
