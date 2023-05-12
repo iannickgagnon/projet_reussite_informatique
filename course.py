@@ -83,11 +83,14 @@ class Course:
         __get_engagement_vector(self, normalize=False):
             Gets the vector of student engagement.
 
-        plot_individual_avg_vs_engagement(self, normalize=False, linear_regression=False):
+        plot_individual_avg_vs_engagement(self,
+                                          normalize=False,
+                                          linear_regression=False):
             Plots individual average vs engagement.
 
-        build_course_list_from_files(path_events_files: str = PATH_EVENTS, path_results_files: str = PATH_RESULTS,
-                                     path_results_surveys: str = PATH_SURVEYS):
+        build_course_list_from_files(path_events_files: str = PATH_EVENTS,
+                                    path_results_files: str = PATH_RESULTS,
+                                    path_results_surveys: str = PATH_SURVEYS):
             Builds a list of courses from files.
 
         split_courses_fail_pass(courses):
@@ -101,9 +104,6 @@ class Course:
 
         plot_combined_stacked_distributions_pass_fail():
             Plots the combined stacked distributions for passes and failures.
-
-        letter_grade_to_points(grade: str) -> float:
-            Converts a letter grade to a points value.
     """
 
     def __init__(self,
@@ -453,26 +453,18 @@ class Course:
         filenames_results = os.listdir(path_results_files)
         filenames_surveys = os.listdir(path_results_surveys)
 
+        # Find filenames
+        filenames = set(filenames_events) & set(filenames_results) & set(filenames_surveys)
+
         course_list = []
-        for filename_results in filenames_results:
-
-            # Extract course and group identifiers
-            course_tag, group_tag = filename_results[:9].split('_')
-
-            # Find corresponding events file
-            try:
-                i = 0
-                while not ((course_tag + '_') in filenames_events[i] and ('_' + group_tag) in filenames_events[i]):
-                    i += 1
-            except IndexError:
-                raise IndexError(f'Could not find events file for {course_tag}-{group_tag}')
+        for filename in filenames:
 
             # Parse
-            events_data, course_id, semester_id = parse_events(filenames_events[i])
-            evaluation_structure, results_data = parse_results(filename_results)
+            events_data, course_id, semester_id = parse_events(filename)
+            evaluation_structure, results_data = parse_results(filename)
 
             # FIXME: This won't work because files are not synced
-            surveys_data = survey.Survey(filenames_surveys[i])
+            surveys_data = survey.Survey(filename)
 
             # Anonymize
             events_data, results_data, surveys_data = anonymize(course_id,

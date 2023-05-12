@@ -108,3 +108,7 @@ PLOT_BORDER_MARGIN_FACTOR_SMALL = 1.025
 PLOT_HISTOGRAM_CONFIG = {'edgecolor': 'black',
                          'bins': [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
                          'linewidth': 0.5}
+
+# Course outcomes
+COURSE_OUTCOMES = ('Abandon', 'Succès', 'Échec')
+COURSE_NB_OUTCOMES = len(COURSE_OUTCOMES)

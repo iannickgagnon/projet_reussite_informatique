@@ -194,59 +194,11 @@ if __name__ == '__main__':
     #analysis_3()
     #analysis_4()
 
-    #TODO: Add listdir and fix _build_from_list() at the same time
-    course_identifiers = ('INF111', 'INF130', 'INF135', 'INF147', 'INF155')
+    #courses = Course.build_course_list_from_files()
+    #with open('courses.pkl', 'wb') as file:
+    #    pickle.dump(courses, file)
 
-    '''
-    # Build courses container (dict)
-    courses = {course_id:[] for course_id in course_identifiers}
-
-    # Get filenames
-    filenames_events = listdir(PATH_EVENTS)
-    filenames_results = listdir(PATH_RESULTS)
-    filenames_surveys = listdir(PATH_SURVEYS)
-
-    for filename in filenames_events:
-
-        # Make sure the corresponding results and surveys are found
-        assert filename in filenames_results, f'Results file not found ({filename})'
-        assert filename in filenames_surveys, f'Surveys file not found ({filename})'
-
-        # Get events data
-        events_data, course_id, semester_id = parse_events(f'{PATH_EVENTS}{filename}')
-
-        # Get evaluation structure and grades
-        evaluation_structure, results_data = parse_results(f'{PATH_RESULTS}{filename}')
-
-        # Get survey data
-        surveys_data = Survey(f'{PATH_SURVEYS}{filename}')
-
-        # Anonymize
-        events_data, results_data, surveys_data = anonymize(course_id,
-                                                            semester_id,
-                                                            events=events_data,
-                                                            results=results_data,
-                                                            surveys=surveys_data,
-                                                            clean_up=True)
-
-        # Build course
-        course_obj = Course(evaluation_structure,
-                            course_id,
-                            semester_id,
-                            events=events_data,
-                            results=results_data,
-                            surveys=surveys_data)
-
-        # Add to courses dictionary
-        courses[filename[:COURSE_ID_LENGTH]].append(course_obj)
-    '''
-
-    '''
-    with open('courses_dict.pkl', 'bw') as file:
-        pickle.dump(courses, file)
-    '''
-
-    with open('courses_dict.pkl', 'rb') as file:
+    with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
     OUTCOMES = {outcome: 0 for outcome in ('Abandon', 'Succès', 'Échec')}
@@ -283,7 +235,7 @@ if __name__ == '__main__':
 
     # Analyser tous les sigles confondus
     is_found = 0
-    for course_id, course in courses.items():
+    for course in courses:
         for answers in course.surveys:
             for student in course.students:
                 if student.name == answers.student_name:
@@ -292,6 +244,10 @@ if __name__ == '__main__':
                             questions_and_outcomes[question_index].append(answers[question_index])
                         else:
                             questions_and_outcomes[question_index][answer][student.get_outcome()] += 1
+
+
+
+
 
     # Print results
     nb_responses = len(questions_and_outcomes[6])
@@ -310,9 +266,14 @@ if __name__ == '__main__':
 
                 total = nb_abandon + nb_succes + nb_echec
 
-                pct_abandon = nb_abandon / freq_answer * 100
-                pct_succes = nb_succes / freq_answer * 100
-                pct_echec = nb_echec / freq_answer * 100
+                if freq_answer == 0.0:
+                    pct_abandon = 0.0
+                    pct_succes = 0.0
+                    pct_echec = 0.0
+                else:
+                    pct_abandon = nb_abandon / freq_answer * 100
+                    pct_succes = nb_succes / freq_answer * 100
+                    pct_echec = nb_echec / freq_answer * 100
 
                 print(f'\t{answer} - {(total / nb_responses * 100):.1f}% ({total})\n')
 
