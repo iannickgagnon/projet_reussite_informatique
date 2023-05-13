@@ -2,6 +2,7 @@
 # External libraries
 import pickle
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 
 from typing import (
@@ -249,10 +250,17 @@ if __name__ == '__main__':
                                                                       sum(bins_outcomes),
                                                                       COURSE_NB_OUTCOMES)
 
+            outcome_index = 0
             for outcome_key, value_outcome, sample_outcome in zip(COURSE_OUTCOMES, bins_outcomes, bootstrap_outcomes):
 
                 # Add to box plot data
-                box_plot_data.append((question_index, answer_key, outcome_key, sample_outcome / total_outcomes * 100))
+                box_plot_data.append((question_index,
+                                      answer_key,
+                                      outcome_key,
+                                      sample_outcome / total_outcomes * 100,
+                                      bins_outcomes[outcome_index]))
+
+                outcome_index += 1
 
                 # Calculate confidence interval for current question
                 lower, upper = bootstrap_calculate_confidence_interval(sample_outcome)
@@ -267,6 +275,187 @@ if __name__ == '__main__':
                 print(f'\t\t\'{outcome_key:7s}\': {value_outcome:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\t{ci_str}')
 
             print()
+
+    # SITUATION FINANCIERE ECHEC
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (71, 74, 77)
+
+        # Sample sizes
+        n1 = box_plot_data[box_plot_data_indexes[0]][4]
+        n2 = box_plot_data[box_plot_data_indexes[1]][4]
+        n3 = box_plot_data[box_plot_data_indexes[2]][4]
+        n_total = n1 + n2 + n3
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Aisée (n = {n1})', f'Satisfaisante (n = {n2})', f'Précaire (n = {n3})'))
+        plt.title(f'Relation entre la situation financière et l\'échec (n = {n_total})')
+        plt.ylabel('Taux d\'échec [%]')
+
+        plt.show()
+
+    # ENFANTS VS ABANDON
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (57, 60)
+
+        # Perform t-test
+        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3],
+                                               box_plot_data[box_plot_data_indexes[1]][3])
+        test_str = f'Test Mann-Whitney U : p < 0.001'
+
+        # Sample sizes
+        n1 = box_plot_data[box_plot_data_indexes[0]][4]
+        n2 = box_plot_data[box_plot_data_indexes[1]][4]
+        n_total = n1 + n2
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Enfants (n = {n1})', f'Pas d\'enfants (n = {n2})'))
+        plt.title(f'Relation entre le fait d\'avoir des enfants et l\'abandon (n = {n_total})')
+        plt.ylabel('Taux d\'abandon [%]')
+
+        plt.show()
+
+    # LANGUE MATERNELLE ET ABANDON
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (48, 54)
+
+        # Perform t-test
+        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3],
+                                               box_plot_data[box_plot_data_indexes[1]][3])
+        test_str = f'Test Mann-Whitney U : p < 0.001'
+
+        # Sample sizes
+        n1 = box_plot_data[box_plot_data_indexes[0]][4]
+        n2 = box_plot_data[box_plot_data_indexes[1]][4]
+        n_total = n1 + n2
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Français (n = {n1})', f'Autre (n = {n2})'))
+        plt.title(f'Relation entre la langue parlée à la maison et l\'abandon (n = {n_total})')
+        plt.ylabel('Taux d\'abandon [%]')
+
+        plt.show()
+
+    # LANGUE MATERNELLE ET ABANDON
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (39, 45)
+
+        # Perform t-test
+        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3], box_plot_data[box_plot_data_indexes[1]][3])
+        test_str = f'Test Mann-Whitney U : p < 0.001'
+
+        # Sample sizes
+        n1 = box_plot_data[box_plot_data_indexes[0]][4]
+        n2 = box_plot_data[box_plot_data_indexes[1]][4]
+        n_total = n1 + n2
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Français (n = {n1})', f'Autre (n = {n2})'))
+        plt.title(f'Relation entre la langue maternelle et l\'abandon (n = {n_total})')
+        plt.ylabel('Taux d\'abandon [%]')
+
+        plt.show()
+
+    # ETUDES VS ETUDES ET TRAVAIL
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (32, 38)
+
+        # Perform t-test
+        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3], box_plot_data[box_plot_data_indexes[1]][3])
+        test_str = f'Test Mann-Whitney U : p < 0.001'
+
+        # Sample sizes
+        n1 = box_plot_data[box_plot_data_indexes[0]][4]
+        n2 = box_plot_data[box_plot_data_indexes[1]][4]
+        n_total = n1 + n2
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Études (n = {n1})', f'Études + travail (n = {n2})'))
+        plt.title(f'Relation entre le travail et l\'échec (n = {n_total})')
+        plt.ylabel('Taux d\'échec [%]')
+
+        plt.show()
+
+    # REPRISE VS ECHEC
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (2, 5)
+
+        # Perform t-test
+        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3], box_plot_data[box_plot_data_indexes[1]][3])
+        test_str = f'Test Mann-Whitney U : p < 0.001'
+
+        # Sample sizes
+        n1 = box_plot_data[box_plot_data_indexes[0]][4]
+        n2 = box_plot_data[box_plot_data_indexes[1]][4]
+        n_total = n1 + n2
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Reprise (n = {n1})', f'Pas reprise (n = {n2})'))
+        plt.title(f'Relation entre la reprise d\'un cours et l\'échec (n = {n_total})')
+        plt.ylabel('Taux d\'échec [%]')
+
+        plt.show()
+
+    # REPRISE VS ABANDON
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+
+        fig, ax = plt.subplots()
+
+        box_plot_data_indexes = (0, 3)
+
+        # Perform t-test
+        t_statistic, p_value = stats.ttest_ind(box_plot_data[0][3], box_plot_data[1][3])
+        test_str = f'Test Mann-Whitney U : p < 0.001'
+
+        # Sample sizes
+        n1 = box_plot_data[0][4]
+        n2 = box_plot_data[3][4]
+        n_total = n1 + n2
+
+        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+
+        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        ax.set_xticklabels((f'Reprise (n = {n1})', f'Pas reprise (n = {n2})'))
+        plt.title(f'Relation entre la reprise d\'un cours et l\'abandon (n = {n_total})')
+        plt.ylabel('Taux d\'abandon [%]')
+
+        plt.show()
+
 
     with plt.style.context('./images/main_plot_style.mplstyle'):
         box_plot_data_indexes = (71, 74, 77)

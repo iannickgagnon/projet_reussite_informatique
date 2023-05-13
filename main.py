@@ -155,9 +155,15 @@ def analysis_2():
     Plots a list of courses' individual averages against engagement.
     """
 
-    fig, ax = Course.plot_combined_individual_avg_vs_engagement(is_linear_regression=True,
-                                                                is_plot_successes=False,
+    fig, ax = Course.plot_combined_individual_avg_vs_engagement(is_linear_regression=False,
+                                                                is_plot_successes=True,
                                                                 is_plot_failures=True)
+
+    # TODO: Remove
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+        plt.title('Relation entre l\'engagement et le résultat (n=719)')
+        plt.ylabel('Moyenne obtenue au cours [%]')
+        plt.legend(('Succès', 'Échec'))
 
     # Export figure and axes
     return fig, ax
@@ -190,7 +196,7 @@ if __name__ == '__main__':
     #analysis_1_a('INF135_02.csv')
     #analysis_1_b('INF135_02.csv')
     #analysis_1_c('INF135_02.csv')
-    #analysis_2()
+    analysis_2()
     #analysis_3()
     #analysis_4()
 
