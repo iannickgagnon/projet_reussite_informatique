@@ -2,6 +2,7 @@
 # External libraries
 import pickle
 import numpy as np
+import matplotlib.pyplot as plt
 
 from typing import (
   Iterable,
@@ -16,6 +17,7 @@ from course import Course
 from constants import (
     COURSE_OUTCOMES,
     COURSE_NB_OUTCOMES,
+    SURVEY_NUMERICAL_QUESTIONS_INDEX,
 )
 
 
@@ -172,19 +174,17 @@ def confidence_interval_to_string(value: (int, float),
     return '[' + confidence_interval_string + ']'
 
 
-
-
-
-
 if __name__ == '__main__':
 
     # TODO: Remove
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
-    questions_and_outcomes = Course.compile_survey_results_from_courses(courses)
+    # Build compiled results data structure
+    questions_and_outcomes = Course.build_compiled_survey_results_data_structure()
 
-    NUMERICAL_QUESTIONS_INDEX = (6,)
+    # Initialize list of worked hours and outcome pairs
+    nb_hours_worked_outcome_pairs = []
 
     # Analyser tous les sigles confondus
     is_found = 0
@@ -193,19 +193,22 @@ if __name__ == '__main__':
             for student in course.students:
                 if student.name == answers.student_name:
                     for question_index, answer in enumerate(answers):
-                        if question_index in NUMERICAL_QUESTIONS_INDEX:
-                            questions_and_outcomes[question_index].append(answers[question_index])
+                        if question_index in SURVEY_NUMERICAL_QUESTIONS_INDEX:
+                            nb_hours_worked_outcome_pairs.append((answers[question_index], student.get_outcome()))
                         else:
                             questions_and_outcomes[question_index][answer][student.get_outcome()] += 1
 
     # Count the total number of answers
     total_counts = sum((sum(d.values()) for d in questions_and_outcomes[0].values()))
 
+    # Initialize data structure for box plots
+    box_plot_data = []
+
     # Parse answers
     for question_index, question in enumerate(questions_and_outcomes.values()):
 
         # No confidence intervals for numerical questions
-        if question_index in NUMERICAL_QUESTIONS_INDEX:
+        if question_index in SURVEY_NUMERICAL_QUESTIONS_INDEX:
             continue
 
         # Show question number
@@ -220,49 +223,57 @@ if __name__ == '__main__':
         # Generate bootstrap samples
         bootstrap_samples_answers = bootstrap_generate_samples_from_bins(bins_question, total_counts, nb_bins)
 
-
-        answer_index = 1
         for answer_key, value, sample in zip(question.keys(), bins_question, bootstrap_samples_answers):
 
             # Calculate confidence interval for current question
-            lower_bound, upper_bound = bootstrap_calculate_confidence_interval(sample)
+            lower, upper = bootstrap_calculate_confidence_interval(sample)
 
             # Transform in percentages
             value = value / total_counts * 100
-            lower_bound = lower_bound / total_counts * 100
-            upper_bound = upper_bound / total_counts * 100
+            lower = lower / total_counts * 100
+            upper = upper / total_counts * 100
 
             # Show proportions for each answer
-            print(f'\tAnswer {answer_index} -> \'{answer_key}\' : {value:<5.1f}% [{lower_bound:5.1f}, {upper_bound:5.1f}]\n')
+            ci_str = confidence_interval_to_string(value, lower, upper)
+            print(f'\tANSWER \'{answer_key}\': {value:<4.1f}% [{lower:4.1f}, {upper:4.1f}] {ci_str}\n')
 
             # Parse outcomes
             outcomes = questions_and_outcomes[question_index][answer_key]
 
-            # Generate bins from question dictionnary
+            # Generate bins from question dictionary
             bins_outcomes = list(outcomes.values())
             total_outcomes = sum(bins_outcomes)
 
             # Generate bootstrap samples
-            bootstrap_samples_outcomes = bootstrap_generate_samples_from_bins(bins_outcomes, sum(bins_outcomes), COURSE_NB_OUTCOMES)
+            bootstrap_outcomes = bootstrap_generate_samples_from_bins(bins_outcomes,
+                                                                      sum(bins_outcomes),
+                                                                      COURSE_NB_OUTCOMES)
 
-            outcome_index = 1
-            for outcome_key, value, sample_outcome in zip(COURSE_OUTCOMES, bins_outcomes, bootstrap_samples_outcomes):
+            for outcome_key, value_outcome, sample_outcome in zip(COURSE_OUTCOMES, bins_outcomes, bootstrap_outcomes):
+
+                # Add to box plot data
+                box_plot_data.append((question_index, answer_key, outcome_key, sample_outcome / total_outcomes * 100))
 
                 # Calculate confidence interval for current question
-                lower_bound, upper_bound = bootstrap_calculate_confidence_interval(sample_outcome)
+                lower, upper = bootstrap_calculate_confidence_interval(sample_outcome)
 
                 # Transform in percentages
-                value = value / total_outcomes * 100
-                lower_bound = lower_bound / total_outcomes * 100
-                upper_bound = upper_bound / total_outcomes * 100
+                value_outcome = value_outcome / total_outcomes * 100
+                lower = lower / total_outcomes * 100
+                upper = upper / total_outcomes * 100
 
                 # Show proportions for each answer
-                confidence_interval_str = confidence_interval_to_string(value, lower_bound, upper_bound)
-                print(f'\t\tOutcome {outcome_index} -> \'{outcome_key:7s}\' : {value:<5.1f}% [{lower_bound:5.1f}, {upper_bound:5.1f}]\t{confidence_interval_str}')
-
-
-                outcome_index += 1
-
-            answer_index += 1
+                ci_str = confidence_interval_to_string(value_outcome, lower, upper)
+                print(f'\t\t\'{outcome_key:7s}\': {value_outcome:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\t{ci_str}')
 
             print()
+
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+        box_plot_data_indexes = (71, 74, 77)
+        plt.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        plt.gca().set_xticklabels(('Aisée', 'Satisfaisante', 'Précaire'))
+        plt.title('Influence de la situation financière auto-déclarée')
+        plt.ylabel('Taux d\'échec [%]')
+        plt.show()
+
+    pass

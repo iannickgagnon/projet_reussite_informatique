@@ -770,7 +770,7 @@ class Course:
         return fig, ax
 
     @staticmethod
-    def compile_survey_results_from_courses(courses: List) -> dict:
+    def build_compiled_survey_results_data_structure() -> dict:
 
         # Build outcome data structure
         OUTCOMES = {outcome: 0 for outcome in ('Abandon', 'Succès', 'Échec')}
