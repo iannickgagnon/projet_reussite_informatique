@@ -194,8 +194,9 @@ if __name__ == '__main__':
     #analysis_3()
     #analysis_4()
 
-    df = parse_results('INF130_05_20231.csv')
-
+    """
+    # Rebuild and save
     courses = Course.build_course_list_from_files()
-    #with open('courses.pkl', 'wb') as file:
-    #    pickle.dump(courses, file)
+    with open('courses.pkl', 'wb') as file:
+        pickle.dump(courses, file)à
+    """

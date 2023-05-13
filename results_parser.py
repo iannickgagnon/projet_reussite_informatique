@@ -151,7 +151,7 @@ def __get_grades(df: pd.DataFrame) -> pd.DataFrame:
     for j in range(2, df_grades.shape[1] - 2):
 
         is_team_work_flag = df_team_work_flag.iat[j] == _TEAM_FLAG
-        is_nan = pd.isna(df_grades.iat[0, j])
+        is_nan = pd.to_numeric(df_grades.iloc[:, j], errors='coerce').isnull().all()
 
         if is_team_work_flag or is_nan:
             cols_to_drop.append(j)
@@ -209,6 +209,7 @@ def __standardize_grades_column_names(df: pd.DataFrame, structure_columns: pd.In
     """
 
     df.columns = pd.Index([COL_NAME_NAME] + list(structure_columns) + [COL_NAME_AVERAGE, COL_NAME_GRADE])
+
     return df
 
 
