@@ -2,7 +2,6 @@
 # External libraries
 import pickle
 import numpy as np
-from copy import deepcopy
 
 from typing import (
   Iterable,
@@ -10,11 +9,15 @@ from typing import (
   List,
 )
 
+# Internal libraries
+from course import Course
+
 # Internal constants
 from constants import (
     COURSE_OUTCOMES,
     COURSE_NB_OUTCOMES,
 )
+
 
 def bootstrap_generate_base_vector_from_bins(bins: Iterable) -> np.array:
     """
@@ -169,40 +172,17 @@ def confidence_interval_to_string(value: (int, float),
     return '[' + confidence_interval_string + ']'
 
 
+
+
+
+
 if __name__ == '__main__':
 
+    # TODO: Remove
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
-    OUTCOMES = {outcome: 0 for outcome in ('Abandon', 'Succès', 'Échec')}
-
-    YES_NO = {'Oui': OUTCOMES.copy(),
-              'Non': OUTCOMES.copy()}
-
-    EMPLOI_ETE = {'Études seulement': OUTCOMES.copy(),
-                  'Travail seulement': OUTCOMES.copy(),
-                  'Études et travail': OUTCOMES.copy()}
-
-    LANGUE = {'Français': OUTCOMES.copy(),
-              'Anglais': OUTCOMES.copy(),
-              'Autre': OUTCOMES.copy()}
-
-    SITUATION_FINANCIERE = {'Aisée': OUTCOMES.copy(),
-                            'Satisfaisante': OUTCOMES.copy(),
-                            'Précaire': OUTCOMES.copy()}
-
-    questions_and_outcomes = {0: deepcopy(YES_NO),
-                              1: deepcopy(YES_NO),
-                              2: deepcopy(YES_NO),
-                              3: deepcopy(YES_NO),
-                              4: deepcopy(YES_NO),
-                              5: deepcopy(EMPLOI_ETE),
-                              6: [],
-                              7: deepcopy(LANGUE),
-                              8: deepcopy(LANGUE),
-                              9: deepcopy(YES_NO),
-                              10: deepcopy(YES_NO),
-                              11: deepcopy(SITUATION_FINANCIERE)}
+    questions_and_outcomes = Course.compile_survey_results_from_courses(courses)
 
     NUMERICAL_QUESTIONS_INDEX = (6,)
 
@@ -231,7 +211,7 @@ if __name__ == '__main__':
         # Show question number
         print(f'Question no.{question_index + 1}\n')
 
-        # Generate bins from question dictionnary
+        # Generate bins from question dictionary
         bins_question = [sum(d.values()) for d in question.values()]
 
         # Calculate the number of bins
