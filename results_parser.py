@@ -94,27 +94,21 @@ def __standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
     exam_count = 1
 
     # Eliminate spaces and convert to uppercase for column names
-    df.columns = [col.upper().replace(' ', '') for col in df.columns]
+    df.columns = pd.Index([col.upper().replace(' ', '') for col in df.columns])
 
-    # Initialize mapping for column names
-    mapping = dict()
-
-    for col in df.columns:
+    for col_index, col_name in enumerate(df.columns):
 
         # Note: Finals need to be processed before midterms to avoid ambiguous names such as 'Examen Final'.
 
         # Build mapping
-        if any_token_in_string(col, _TOKENS_GROUP_PROJECTS):
-            mapping[col] = f'TP0{tp_count}'
+        if any_token_in_string(col_name, _TOKENS_GROUP_PROJECTS):
+            df.columns.values[col_index] = f'TP0{tp_count}'
             tp_count += 1
-        elif any_token_in_string(col, _TOKENS_FINAL_EXAM):
-            mapping[col] = 'FINAL'
-        elif any_token_in_string(col, _TOKENS_MIDTERMS):
-            mapping[col] = f'EXAM0{exam_count}'
+        elif any_token_in_string(col_name, _TOKENS_FINAL_EXAM):
+            df.columns.values[col_index] = 'FINAL'
+        elif any_token_in_string(col_name, _TOKENS_MIDTERMS):
+            df.columns.values[col_index] = f'EXAM0{exam_count}'
             exam_count += 1
-
-    # Apply mapping
-    df.rename(columns=mapping, inplace=True)
 
     return df
 
@@ -229,14 +223,13 @@ def __normalize_grades(df_structure: pd.DataFrame, df_grades: pd.DataFrame) -> p
     Returns:
         (pd.DataFrame): The normalized grades DataFrame.
     """
-
     for col in df_structure.columns:
         if df_structure[col].loc[_INDEX_CORRECTED_ON] != _100_PERCENT and \
            df_structure[col].loc[_INDEX_CORRECTED_ON] != _0_PERCENT:
             df_grades[col] *= 100 / df_structure[col].loc[_INDEX_CORRECTED_ON]
 
-        if any(df_grades[col] > 100):
-            pass
+            if any(df_grades[col] > 100):
+                pass
 
     return df_grades
 
