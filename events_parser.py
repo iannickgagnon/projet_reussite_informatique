@@ -4,6 +4,8 @@ import re
 import pandas as pd
 from os.path import isfile
 
+from typing import Tuple
+
 # Internal constants
 from constants import (
     COLS_TO_REMOVE,
@@ -18,7 +20,7 @@ from constants import (
 )
 
 
-def parse_events(filename: str) -> tuple[pd.DataFrame, str, str]:
+def parse_events(filename: str) -> Tuple[pd.DataFrame, str, str]:
     """
     Parses a CSV file containing event data and returns a cleaned DataFrame with course ID and semester information.
 

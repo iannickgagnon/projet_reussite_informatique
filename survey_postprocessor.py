@@ -24,8 +24,8 @@ from constants import (
 
 def bootstrap_generate_base_vector_from_bins(bins: Iterable) -> np.array:
     """
-    Creates a base vector for bootstrap sampling based on histogram bins. For example, the bins [2, 6, 4] becomes
-    [0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2].
+    Creates a base vector for bootstrap sampling based on histogram bins (i.e. counts). For example, the bins [2, 6, 4]
+    becomes [0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2].
 
     Args:
         bins (Iterable): The histogram bin counts.
@@ -34,20 +34,7 @@ def bootstrap_generate_base_vector_from_bins(bins: Iterable) -> np.array:
         (np.array): The generated base vector as explained above.
     """
 
-    # Calculate size of base vector
-    n = sum(bins)
-
-    # Initialize base vector
-    base_vector = np.zeros(n)
-
-    # Build base vector
-    m = 0
-    for i, bin_length in enumerate(bins):
-        for _ in range(bin_length):
-          base_vector[m] = i
-          m += 1
-
-    return base_vector
+    return np.repeat(range(len(bins)), bins)
 
 
 def bootstrap_generate_samples_from_bins(bins: Iterable,
@@ -156,9 +143,9 @@ def confidence_interval_to_string(value: (int, float),
         return ''
 
     # Determine position of the value and the bounds
-    position_val = int(width * value / (width * 2))
-    position_lower_bound = int(width * lower_bound / (width * 2))
-    position_upper_bound = int(width * upper_bound / (width * 2))
+    position_val = value // 2
+    position_lower_bound = lower_bound // 2
+    position_upper_bound = upper_bound // 2
 
     # Store positions and corresponding symbols
     positions = (position_val, position_lower_bound, position_upper_bound)
@@ -177,7 +164,7 @@ def confidence_interval_to_string(value: (int, float),
 
 if __name__ == '__main__':
 
-    # TODO: Remove
+    # Load pickled dataset
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
@@ -187,11 +174,17 @@ if __name__ == '__main__':
     # Initialize list of worked hours and outcome pairs
     nb_hours_worked_outcome_pairs = []
 
-    # Analyser tous les sigles confondus
+    # Analyze courses
     is_found = 0
     for course in courses:
+
+        # Through current course's surveys
         for answers in course.surveys:
+
+            # Through current course surveys answers' student list
             for student in course.students:
+
+                # TODO: Finish commenting and consider refactoring
                 if student.name == answers.student_name:
                     for question_index, answer in enumerate(answers):
                         if question_index in SURVEY_NUMERICAL_QUESTIONS_INDEX:
@@ -464,5 +457,3 @@ if __name__ == '__main__':
         plt.title('Influence de la situation financière auto-déclarée')
         plt.ylabel('Taux d\'échec [%]')
         plt.show()
-
-    pass
