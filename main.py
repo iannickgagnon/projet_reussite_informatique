@@ -1,9 +1,22 @@
 
 # External libraries
 import pickle
-from copy import deepcopy
-from statistics import mean
+import pandas as pd
+from sklearn.svm import SVC
 import matplotlib.pyplot as plt
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+)
 
 # Internal libraries
 from survey import Survey
@@ -11,6 +24,11 @@ from course import Course
 from anonymizer import anonymize
 from events_parser import parse_events
 from results_parser import parse_results
+from predictor import train_and_test_model
+from predictor import calculate_performance_metrics
+
+# Internal constants
+from constants import SURVEY_NB_QUESTIONS
 
 
 def analysis_1_a(filename: str,
@@ -191,18 +209,112 @@ def analysis_4():
     return fig, ax
 
 
+def analysis_5():
+
+    # TODO: Refactor in Course.to_vector() static method or something
+    import pickle
+    with open('courses.pkl', 'rb') as file:
+        courses = pickle.load(file)
+
+    course_dataset = []
+    for current_course in courses:
+        for current_student in current_course.students:
+            engagement = current_student.nb_events
+            outcome = current_student.get_outcome()
+            exam_result = float(current_student.results['EXAM01'])
+            survey = Survey.filter_by_student_name(current_course.surveys, current_student.name)
+
+            # TODO: This is necessary because the clean_up option wasn't used when the data was anonymized
+            if survey is not None:
+                course_dataset.append([answer for answer in survey[0]] + [engagement, exam_result, outcome])
+
+    # Convert to DataFrame
+    column_names = [f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Events', 'EXAM01', 'Outcome']
+    course_dataset = pd.DataFrame(course_dataset, columns=column_names)
+
+    # Encode predictors and response
+    x_data = pd.get_dummies(course_dataset.iloc[:, :-1])
+
+    # Response using one-hot encoding to get a vector
+    y_encoder = LabelEncoder()
+    y_data = pd.DataFrame({'Outcome': y_encoder.fit_transform(course_dataset.iloc[:, -1])})
+
+    # Extract encoder classes
+    classes = y_encoder.classes_
+
+    # Balance classes using Synthetic Minority Oversampling TEchnique (SMOTE)
+    smote = SMOTE()
+    x_data_resampled, y_data_resampled = smote.fit_resample(x_data, y_data)
+
+    '''
+        MAKE PREDICTIONS
+    '''
+
+    # Initialize model
+    models = {'Logistic regression': LogisticRegression(),
+              'Decision trees': DecisionTreeClassifier(),
+              'Random forest': RandomForestClassifier(),
+              'SVM with linear kernel': SVC(kernel='linear'),
+              'SVM with polynomial kernel': SVC(kernel='poly', degree=3),
+              'SVM with radial RBF kernel': SVC(kernel='rbf')}
+
+    # Split into training and test sets
+    x_train_resampled, x_test_resampled, y_train_resampled, y_test_resampled = \
+        train_test_split(x_data_resampled, y_data_resampled, test_size=0.2)
+
+    # Run models and evaluate
+    for model_name, model in models.items():
+
+        # Train and test the model
+        y_train_pred_resampled, y_test_pred_resampled = \
+            train_and_test_model(model, x_train_resampled, y_train_resampled, x_test_resampled)
+
+        # Show model name
+        print(f'\n\nRESAMPLED {model_name}\n')
+
+        # Evaluate model and show
+        calculate_performance_metrics(y_train_resampled,
+                                      y_train_pred_resampled,
+                                      y_test_resampled,
+                                      y_test_pred_resampled,
+                                      labels=classes)
+
+        # Calculate performance metrics on original dataset
+        print(f'\n\nNOT RESAMPLED {model_name}\n')
+
+        y_pred_not_resampled = model.predict(x_data)
+
+        # Show performance metrics
+        train_accuracy = accuracy_score(y_data, y_pred_not_resampled)
+        train_precision = precision_score(y_data, y_pred_not_resampled, average=None)
+        train_recall = recall_score(y_data, y_pred_not_resampled, average=None)
+        train_f1 = f1_score(y_data, y_pred_not_resampled, average=None)
+
+        precision_str = ' '.join([f'{label}: {precision:.2f}\t' for label, precision in zip(classes, train_precision)])
+        recall_str = ' '.join([f'{label}: {recall:.2f}\t' for label, recall in zip(classes, train_recall)])
+        f1_str = ' '.join([f'{label}: {f1:.2f}\t' for label, f1 in zip(classes, train_f1)])
+
+        print("\tAccuracy  :", train_accuracy)
+        print("\tPrecision :", precision_str)
+        print("\tRecall    :", recall_str)
+        print("\tF1 Score  :", f1_str)
+
+
 if __name__ == '__main__':
 
-    #analysis_1_a('INF135_02.csv')
-    #analysis_1_b('INF135_02.csv')
-    #analysis_1_c('INF135_02.csv')
+    '''
+    analysis_1_a('INF135_02.csv')
+    analysis_1_b('INF135_02.csv')
+    analysis_1_c('INF135_02.csv')
     analysis_2()
-    #analysis_3()
-    #analysis_4()
+    analysis_3()
+    analysis_4()
+    '''
+    analysis_5()
 
-    """
+    '''
     # Rebuild and save
     courses = Course.build_course_list_from_files()
     with open('courses.pkl', 'wb') as file:
         pickle.dump(courses, file)à
-    """
+    '''

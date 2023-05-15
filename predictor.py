@@ -43,4 +43,4 @@ def calculate_performance_metrics(y_train, y_train_pred, y_test, y_test_pred, la
         print("\n\tTraining Recall    :", ' '.join([f'{label}: {recall:.2f}\t' for label, recall in zip(labels, train_recall)]))
         print("\tTest Recall        :", ' '.join([f'{label}: {recall:.2f}\t' for label, recall in zip(labels, test_recall)]))
         print("\n\tTraining F1 Score  :", ' '.join([f'{label}: {f1:.2f}\t' for label, f1 in zip(labels, train_f1)]))
-        print("\tTest F1 Score      :", ' '.join([f'{label}: {f1:.2f}\t' for label, f1 in zip(labels, train_f1)]))
+        print("\tTest F1 Score      :", ' '.join([f'{label}: {f1:.2f}\t' for label, f1 in zip(labels, test_f1)]))
