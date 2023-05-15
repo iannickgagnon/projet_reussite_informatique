@@ -3,10 +3,20 @@
 import numpy as np
 import pandas as pd
 
+from sklearn.svm import SVC
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
 # Internal libraries
 from survey import Survey
 from course import Course
 from anonymizer import anonymize
+
+from predictor import train_and_test_model
+from predictor import calculate_performance_metrics
 
 # Pytest fixtures
 from test_events_parser import test_data_expected_events
@@ -53,7 +63,7 @@ def test_to_dataset(test_data_expected_structure,
 
     #TODO: Refactor in Student.to_vector() method
     import pickle
-    with open('courses.pkl', 'rb') as file:
+    with open('..\courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
     course_dataset = []
@@ -61,150 +71,41 @@ def test_to_dataset(test_data_expected_structure,
         for current_student in current_course.students:
             student_outcome = current_student.get_outcome()
             current_student_survey = Survey.filter_by_student_name(current_course.surveys, current_student.name)
-            course_dataset.append([answer for answer in current_student_survey[0]] + [student_outcome])
+
+            # TODO: This is necessary because the clean_up option wasn't used when the data was anonymized
+            if current_student_survey is not None:
+                course_dataset.append([answer for answer in current_student_survey[0]] + [current_student.nb_events, student_outcome])
 
     # Convert to DataFrame
-    course_dataset = pd.DataFrame(course_dataset, columns=[f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Outcome'])
+    course_dataset = pd.DataFrame(course_dataset, columns=[f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Events', 'Outcome'])
 
-    # Encode discrete input variables
-    encoded_course_dataset = pd.get_dummies(course_dataset)
+    # Encode predictors and response
+    x_data = pd.get_dummies(course_dataset.iloc[:, :-1])
+    y_encoder = LabelEncoder()
+    y_data = pd.DataFrame({'Outcome': y_encoder.fit_transform(course_dataset.iloc[:, -1])})
 
-    # Multiple linear regression
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.tree import DecisionTreeClassifier
+    '''
+        MAKE PREDICTIONS
+    '''
 
-    from sklearn.model_selection import train_test_split
-
-    from sklearn.metrics import (
-        accuracy_score,
-        precision_score,
-        recall_score,
-        f1_score,
-    )
-
-    # Split into predictors and output
-    x_data = encoded_course_dataset.iloc[:, :-1]
-    y_data = encoded_course_dataset.iloc[:, -1]
+    # Initialize model
+    models = {'Logistic regression': LogisticRegression(),
+              'Decision trees': DecisionTreeClassifier(),
+              'Random forest': RandomForestClassifier(),
+              'SVM with linear kernel': SVC(kernel='linear'),
+              'SVM with polynomial kernel': SVC(kernel='poly', degree=3),
+              'SVM with radial RBF kernel': SVC(kernel='rbf')}
 
     # Split into training and test sets
-    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.3, random_state=42)
 
-    # Initialize model and fit to data
-    model = LogisticRegression()
-    model.fit(x_data, y_data)
+    for model_name, model in models.items():
 
-    # Make predictions using the trained model
-    y_train_pred = model.predict(x_train)
-    y_test_pred = model.predict(x_test)
+        # Train and test the model
+        y_train_pred, y_test_pred = train_and_test_model(model, x_train, y_train, x_test)
 
-    # Calculate performance metrics
-    train_accuracy = accuracy_score(y_train, y_train_pred)
-    test_accuracy = accuracy_score(y_test, y_test_pred)
-    train_precision = precision_score(y_train, y_train_pred, average='weighted')
-    test_precision = precision_score(y_test, y_test_pred, average='weighted')
-    train_recall = recall_score(y_train, y_train_pred, average='weighted')
-    test_recall = recall_score(y_test, y_test_pred, average='weighted')
-    train_f1 = f1_score(y_train, y_train_pred, average='weighted')
-    test_f1 = f1_score(y_test, y_test_pred, average='weighted')
+        # Show model name
+        print(f'\n\n{model_name}\n')
 
-    # Show performance metrics
-    print("Training Accuracy:", train_accuracy)
-    print("Test Accuracy:", test_accuracy)
-    print("Training Precision:", train_precision)
-    print("Test Precision:", test_precision)
-    print("Training Recall:", train_recall)
-    print("Test Recall:", test_recall)
-    print("Training F1 Score:", train_f1)
-    print("Test F1 Score:", test_f1)
-
-    # Repeat for decision trees
-    print('\nDECISION TREES')
-
-    model_decision_tree = DecisionTreeClassifier()
-    model.fit(x_train, y_train)
-    y_train_pred_tree = model.predict(x_train)
-    y_test_pred_tree = model.predict(x_test)
-
-    # Calculate performance metrics
-    train_accuracy_tree = accuracy_score(y_train, y_train_pred)
-    test_accuracy_tree = accuracy_score(y_test, y_test_pred)
-    train_precision = precision_score(y_train, y_train_pred, average='weighted')
-    test_precision = precision_score(y_test, y_test_pred, average='weighted')
-    train_recall = recall_score(y_train, y_train_pred, average='weighted')
-    test_recall = recall_score(y_test, y_test_pred, average='weighted')
-    train_f1 = f1_score(y_train, y_train_pred, average='weighted')
-    test_f1 = f1_score(y_test, y_test_pred, average='weighted')
-
-    # Print the performance metrics
-    print("Training Accuracy:", train_accuracy)
-    print("Test Accuracy:", test_accuracy)
-    print("Training Precision:", train_precision)
-    print("Test Precision:", test_precision)
-    print("Training Recall:", train_recall)
-    print("Test Recall:", test_recall)
-    print("Training F1 Score:", train_f1)
-    print("Test F1 Score:", test_f1)
-
-    from sklearn.svm import SVC
-    model = SVC(kernel='rbf')
-    model.fit(x_train, y_train)
-
-    """
-    import pandas as pd
-    from sklearn.model_selection import train_test_split, GridSearchCV
-    from sklearn.svm import SVC
-    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-    
-    # Load the dataframe
-    df = pd.read_csv('your_dataframe.csv')
-    
-    # Split the dataframe into input features (X) and the output variable (y)
-    X = df.iloc[:, :-1]  # Select all columns except the last one as input features
-    y = df.iloc[:, -1]   # Select the last column as the output variable
-    
-    # Split the dataset into training and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Define the parameter grid for the grid search
-    param_grid = {
-        'C': [0.1, 1, 10],
-        'kernel': ['linear', 'poly', 'rbf'],
-    }
-    
-    # Initialize and fit the SVM classifier with grid search
-    model = SVC()
-    grid_search = GridSearchCV(model, param_grid, cv=5)
-    grid_search.fit(X_train, y_train)
-    
-    # Get the best model from the grid search
-    best_model = grid_search.best_estimator_
-    
-    # Predict using the best model
-    y_train_pred = best_model.predict(X_train)
-    y_test_pred = best_model.predict(X_test)
-    
-    # Calculate performance metrics
-    train_accuracy = accuracy_score(y_train, y_train_pred)
-    test_accuracy = accuracy_score(y_test, y_test_pred)
-    train_precision = precision_score(y_train, y_train_pred, average='weighted')
-    test_precision = precision_score(y_test, y_test_pred, average='weighted')
-    train_recall = recall_score(y_train, y_train_pred, average='weighted')
-    test_recall = recall_score(y_test, y_test_pred, average='weighted')
-    train_f1 = f1_score(y_train, y_train_pred, average='weighted')
-    test_f1 = f1_score(y_test, y_test_pred, average='weighted')
-    
-    # Print the performance metrics
-    print("Training Accuracy:", train_accuracy)
-    print("Test Accuracy:", test_accuracy)
-    print("Training Precision:", train_precision)
-    print("Test Precision:", test_precision)
-    print("Training Recall:", train_recall)
-    print("Test Recall:", test_recall)
-    print("Training F1 Score:", train_f1)
-    print("Test F1 Score:", test_f1)
-    
-    # Print the best hyperparameters found by grid search
-    print("Best Hyperparameters:", grid_search.best_params_)
-    """
-
-    print()
+        # Evaluate model and show
+        calculate_performance_metrics(y_train, y_train_pred, y_test, y_test_pred, labels=y_encoder.classes_)
