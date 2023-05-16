@@ -210,34 +210,23 @@ def analysis_4():
 
 
 def analysis_5():
+    """
+    Plots the stacked histograms of failures and successes distributions.
+    """
 
-    # TODO: Refactor in Course.to_vector() static method or something
     import pickle
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
-    course_dataset = []
-    for current_course in courses:
-        for current_student in current_course.students:
-            engagement = current_student.nb_events
-            outcome = current_student.get_outcome()
-            exam_result = float(current_student.results['EXAM01'])
-            survey = Survey.filter_by_student_name(current_course.surveys, current_student.name)
-
-            # TODO: This is necessary because the clean_up option wasn't used when the data was anonymized
-            if survey is not None:
-                course_dataset.append([answer for answer in survey[0]] + [engagement, exam_result, outcome])
-
-    # Convert to DataFrame
-    column_names = [f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Events', 'EXAM01', 'Outcome']
-    course_dataset = pd.DataFrame(course_dataset, columns=column_names)
+    # Extract data from list of courses
+    course_data = Course.course_list_to_table(courses)
 
     # Encode predictors and response
-    x_data = pd.get_dummies(course_dataset.iloc[:, :-1])
+    x_data = pd.get_dummies(course_data.iloc[:, :-1])
 
     # Response using one-hot encoding to get a vector
     y_encoder = LabelEncoder()
-    y_data = pd.DataFrame({'Outcome': y_encoder.fit_transform(course_dataset.iloc[:, -1])})
+    y_data = pd.DataFrame({'Outcome': y_encoder.fit_transform(course_data.iloc[:, -1])})
 
     # Extract encoder classes
     classes = y_encoder.classes_

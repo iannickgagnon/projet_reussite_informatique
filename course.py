@@ -15,7 +15,7 @@ from typing import (
 )
 
 # Internal libraries
-import survey
+from survey import Survey
 from student import Student
 from anonymizer import anonymize
 from events_parser import parse_events
@@ -46,6 +46,7 @@ from constants import (
     PLOT_BORDER_MARGIN_FACTOR,
     PLOT_BORDER_MARGIN_FACTOR_SMALL,
     PLOT_HISTOGRAM_CONFIG,
+    SURVEY_NB_QUESTIONS,
 )
 
 
@@ -67,7 +68,7 @@ class Course:
     Methods:
 
         __init__(self, evaluation_structure: DataFrame, course_id: str, semester_id: str, events: DataFrame,
-                 results: DataFrame, surveys: survey.Survey) -> None:
+                 results: DataFrame, surveys: Survey) -> None:
             Initializes a new instance of the Course class.
 
         __build(self) -> None:
@@ -117,7 +118,7 @@ class Course:
                  semester_id: str,
                  events: pd.DataFrame,
                  results: pd.DataFrame,
-                 surveys: survey.Survey = None) -> None:
+                 surveys: Survey = None) -> None:
         """
         Initializes a new instance of the Course class.
 
@@ -127,7 +128,7 @@ class Course:
             semester_id (str): The ID of the semester the course is taught in.
             events (DataFrame): The events associated with the course.
             results (DataFrame): The results of the course.
-            surveys (survey.Survey, optional): The survey responses for the course. Defaults to None.
+            surveys (Survey, optional): The survey responses for the course. Defaults to None.
         """
 
         # Store raw data
@@ -469,7 +470,7 @@ class Course:
             evaluation_structure, results_data = parse_results(filename)
 
             # FIXME: This won't work because files are not synced
-            surveys_data = survey.Survey(filename)
+            surveys_data = Survey(filename)
 
             # Anonymize
             events_data, results_data, surveys_data = anonymize(course_id,
@@ -809,3 +810,45 @@ class Course:
                                   11: deepcopy(SITUATION_FINANCIERE)}
 
         return questions_and_outcomes
+
+    @staticmethod
+    def course_list_to_table(list_of_courses: list):
+        """
+        Converts a list of courses to a DataFrame for classification. Includes questionnaire answers, engagement, first
+        exam result and pass/fail/abandon outcome.
+
+        Args:
+            list_of_courses (list): A list containing instances of the Course class.
+
+        Returns:
+            (DataFrame): A table containing the combined data of all the list's courses.
+        """
+
+        # Data container
+        data = []
+
+        # Through all the students of all the courses
+        for current_course in list_of_courses:
+            for current_student in current_course.students:
+
+                # Get engagement proxy
+                engagement = current_student.nb_events
+
+                # Get pass/fail/abandon outcome
+                outcome = current_student.get_outcome()
+
+                # Get the first exam's result
+                exam_result = float(current_student.results['EXAM01'])
+
+                # Get survey
+                survey = Survey.filter_by_student_name(current_course.surveys, current_student.name)
+
+                # Ignore students without surveys
+                if survey is not None:
+                    data.append([answer for answer in survey[0]] + [engagement, exam_result, outcome])
+
+        # Build column names vector
+        column_names = [f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Engagement', 'EXAM01', 'Outcome']
+
+        # Return as a DataFrame
+        return pd.DataFrame(data, columns=column_names)
