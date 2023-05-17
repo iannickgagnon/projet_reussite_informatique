@@ -13,6 +13,7 @@ from typing import (
 
 # Internal libraries
 from course import Course
+from tools import bootstrap_calculate_confidence_interval
 
 # Internal constants
 from constants import (
@@ -94,32 +95,6 @@ def bootstrap_generate_samples_from_bins(bins: Iterable,
 
     # Return columns
     return columns
-
-
-def bootstrap_calculate_confidence_interval(base_vector: np.array, alpha: float = 0.05) -> Tuple[float, float]:
-    """
-    Calculates (1 - alpha) confidence intervals (CI) for a given dataset.
-
-    Args:
-      base_vector (np.array): Data to calculate the CI for.
-      alpha (float): Significance level of the desired interval.
-
-    Returns:
-      (Tuple[float, float]): Lower and upper bounds of the CI.
-    """
-
-    # Sort in ascending order
-    sorted_data = np.sort(base_vector)
-
-    # (1 - alpha) confidence bounds
-    lower_bound = alpha / 2
-    upper_bound = 1 - lower_bound
-
-    # Confidence bounds indexes
-    lower_index = int(lower_bound * base_vector.shape[0])
-    upper_index = int(upper_bound * base_vector.shape[0])
-
-    return sorted_data[lower_index], sorted_data[upper_index]
 
 
 def confidence_interval_to_string(value: (int, float),

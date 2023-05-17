@@ -838,7 +838,7 @@ class Course:
                 outcome = current_student.get_outcome()
 
                 # Get the first exam's result
-                exam_result = float(current_student.results['EXAM01'])
+                exam_result = float(current_student.results['EXAM01'].iloc[0])
 
                 # Get survey
                 survey = Survey.filter_by_student_name(current_course.surveys, current_student.name)
