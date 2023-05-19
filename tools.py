@@ -4,6 +4,9 @@ import numpy as np
 from typing import Tuple
 import matplotlib.pyplot as plt
 
+# Internal constants
+from constants import PATH_MAIN_PLOT_STYLE
+
 
 def bootstrap_calculate_confidence_interval(base_vector: np.array, alpha: float = 0.05) -> Tuple[float, float]:
     """
@@ -29,6 +32,7 @@ def bootstrap_calculate_confidence_interval(base_vector: np.array, alpha: float 
     upper_index = int(upper_bound * base_vector.shape[0])
 
     return sorted_data[lower_index], sorted_data[upper_index]
+
 
 def letter_grade_to_points(grade: str) -> float:
     """
@@ -72,7 +76,7 @@ def letter_grade_to_points(grade: str) -> float:
         raise ValueError(f'Invalid grade ({grade})')
 
 
-def plot_confidence_intervals(low, mid, high, x_labels=None):
+def plot_confidence_intervals(low: list, mid: list, high: list, x_labels: list =None):
     """
     Plots confidence intervals with custom x labels.
 
@@ -108,3 +112,57 @@ def plot_confidence_intervals(low, mid, high, x_labels=None):
     # Change x labels
     if x_labels is not None:
         plt.xticks(list(range(len(low))), x_labels)
+
+
+if __name__ == '__main__':
+
+    # CIs for Abandon
+
+    '''low = [42, 64, 67, 77, 80, 83]
+    mid = [53, 79, 80, 91, 92, 94]
+    high = [68, 93, 94, 100, 100, 100]
+    
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+        plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
+        plt.title('Intervalles de confiance 95% pour l\'abandon')
+        plt.xlabel('Modèle')
+        plt.ylabel('Précision [%]')
+        plt.ylim([40, 102.5])
+        plt.gca().yaxis.grid(True, linestyle='--', alpha=0.625)
+        plt.show()'''
+
+
+    # CIs for Fail
+
+    low = [43, 54, 52, 70, 71, 78]
+    mid = [52, 67, 68, 84, 86, 90]
+    high = [62, 81, 85, 86, 100, 100]
+    
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+        plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
+        plt.title('Intervalles de confiance 95% pour l\'échec')
+        plt.xlabel('Modèle')
+        plt.ylabel('Précision [%]')
+        plt.ylim([40, 102.5])
+        plt.gca().yaxis.grid(True, linestyle='--', alpha=0.625)
+        plt.show()
+
+
+    # CIs for Fail
+    '''
+    low = [95, 95, 90, 95, 95, 96]
+    mid = [98, 95, 93, 97, 97, 99]
+    high = [100, 96, 95, 100, 100, 100]
+
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+        plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
+        plt.title('Intervalles de confiance 95% pour le succès')
+        plt.xlabel('Modèle')
+        plt.ylabel('Précision [%]')
+        plt.ylim([40, 102.5])
+        plt.show()
+    '''
+
+

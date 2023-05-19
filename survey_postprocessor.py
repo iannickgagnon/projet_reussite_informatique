@@ -13,6 +13,7 @@ from typing import (
 
 # Internal libraries
 from course import Course
+from tools import plot_confidence_intervals
 from tools import bootstrap_calculate_confidence_interval
 
 # Internal constants
@@ -20,6 +21,7 @@ from constants import (
     COURSE_OUTCOMES,
     COURSE_NB_OUTCOMES,
     SURVEY_NUMERICAL_QUESTIONS_INDEX,
+    PATH_MAIN_PLOT_STYLE,
 )
 
 
@@ -139,6 +141,40 @@ def confidence_interval_to_string(value: (int, float),
 
 if __name__ == '__main__':
 
+    # CIs for retaking the course and abandon
+
+    low = [17.4, 3.8]
+    mid = [23.3, 7.6]
+    high = [29.7, 12.1]
+
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+        plot_confidence_intervals(low, mid, high, x_labels=['Oui', 'Non'])
+        plt.title('Reprenez-vous le cours?')
+        plt.ylabel('Taux d\'abandon [%]')
+        plt.ylim([0, 65])
+        plt.xlim([-1, 2])
+        plt.gca().yaxis.grid(True, linestyle='--', alpha=0.625)
+        plt.show()
+
+
+    # CIs for having children and Abandon
+    '''
+    low = [15.8, 3.8]
+    mid = [38.5, 7.5]
+    high = [61.5, 12.5]
+
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+        plot_confidence_intervals(low, mid, high, x_labels=['Oui', 'Non'])
+        plt.title('Avez-vous des enfants sous votre responsabilité?')
+        plt.ylabel('Taux d\'abandon [%]')
+        plt.ylim([0, 65])
+        plt.xlim([-1, 2])
+        plt.gca().yaxis.grid(True, linestyle='--', alpha=0.625)
+        plt.show()
+    '''
+
+if __name__ == '__main__':
+
     # Load pickled dataset
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
@@ -203,8 +239,7 @@ if __name__ == '__main__':
             upper = upper / total_counts * 100
 
             # Show proportions for each answer
-            ci_str = confidence_interval_to_string(value, lower, upper)
-            print(f'\tANSWER \'{answer_key}\': {value:<4.1f}% [{lower:4.1f}, {upper:4.1f}] {ci_str}\n')
+            print(f'\tANSWER \'{answer_key}\': {value:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\n')
 
             # Parse outcomes
             outcomes = questions_and_outcomes[question_index][answer_key]
@@ -239,8 +274,7 @@ if __name__ == '__main__':
                 upper = upper / total_outcomes * 100
 
                 # Show proportions for each answer
-                ci_str = confidence_interval_to_string(value_outcome, lower, upper)
-                print(f'\t\t\'{outcome_key:7s}\': {value_outcome:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\t{ci_str}')
+                print(f'\t\t\'{outcome_key:7s}\': {value_outcome:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\t')
 
             print()
 
