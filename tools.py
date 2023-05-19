@@ -2,6 +2,7 @@
 # External libraries
 import numpy as np
 from typing import Tuple
+import matplotlib.pyplot as plt
 
 
 def bootstrap_calculate_confidence_interval(base_vector: np.array, alpha: float = 0.05) -> Tuple[float, float]:
@@ -69,3 +70,41 @@ def letter_grade_to_points(grade: str) -> float:
         return 0.0
     else:
         raise ValueError(f'Invalid grade ({grade})')
+
+
+def plot_confidence_intervals(low, mid, high, x_labels=None):
+    """
+    Plots confidence intervals with custom x labels.
+
+    Args:
+      low (list): List of lower bounds.
+      mid (list): List of middle points.
+      high (list): List of upper bounds.
+      xticks (list, optional): List of user-defined x labels. Defaults to None.
+
+    Returns:
+      Nothing.
+    """
+
+    TIP_LINE_WIDTH = 0.25  # Width of the top and bottom lines
+    LINE_COLOR = 'steelblue'  # Line color
+    DOT_COLOR = 'indianred'  # Color of center dot
+
+    for i in range(len(low)):
+        # Vertical line
+        plt.plot([i, i], [low[i], high[i]], color=LINE_COLOR)
+
+        # Tip lines
+        left = i - 0.5 * TIP_LINE_WIDTH
+        right = i + 0.5 * TIP_LINE_WIDTH
+
+        # Tip lines
+        plt.plot([left, right], [high[i], high[i]], color=LINE_COLOR)
+        plt.plot([left, right], [low[i], low[i]], color=LINE_COLOR)
+
+        # Center dot
+        plt.plot(i, mid[i], 'o', color=DOT_COLOR)
+
+    # Change x labels
+    if x_labels is not None:
+        plt.xticks(list(range(len(low))), x_labels)
