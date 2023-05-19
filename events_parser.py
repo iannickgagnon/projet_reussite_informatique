@@ -17,6 +17,7 @@ from constants import (
     COL_NAME_TIME,
     COL_NAME_NAME,
     PATH_EVENTS,
+    SECONDS_PER_MINUTE,
 )
 
 
@@ -37,13 +38,15 @@ def parse_events(filename: str) -> Tuple[pd.DataFrame, str, str]:
     # Adjust filename
     if not isfile(filename):
         filename = PATH_EVENTS + filename
+        if not isfile(filename):
+            raise FileExistsError('Events file not found')
 
     # Import raw file
     df = pd.read_csv(filename)
 
     # Get course info before removing columns
     course_id = __get_course_id(df)
-    semester = __get_semester(df)
+    semester = __get_semester_id(df)
 
     # Rename columns
     df = df.rename(columns=COLS_TO_RENAME)
@@ -93,7 +96,7 @@ def __get_course_id(data: pd.DataFrame) -> str:
         return course_id_match.group().replace('-', '_')
 
 
-def __get_semester(data: pd.DataFrame) -> str:
+def __get_semester_id(data: pd.DataFrame) -> str:
     """
     Extracts the semester from the given DataFrame.
 
@@ -134,12 +137,12 @@ def __time_str_to_float(time: str) -> float:
     h, m = time.split(':')
 
     # Convert to float
-    time_float = float(h) + float(m) / 60.
+    time_float = float(h) + float(m) / SECONDS_PER_MINUTE
 
     return time_float
 
 
-def __get_members_list(data: pd.DataFrame) -> list:
+def __get_students_list(data: pd.DataFrame) -> list:
     """
     Extracts a list of unique member names from a DataFrame.
 

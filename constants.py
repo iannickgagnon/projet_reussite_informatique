@@ -9,7 +9,6 @@ PATH_TEST_EVENTS_FROM_TESTS = './test_data/test_events.csv'
 PATH_MAIN_PLOT_STYLE = './images/main_plot_style.mplstyle'
 
 # DataFrame column names
-
 ORIGINAL_COL_NAME_NAME = 'Nom complet'
 ORIGINAL_COL_NAME_TIME = 'Heure'
 
@@ -113,3 +112,6 @@ PLOT_HISTOGRAM_CONFIG = {'edgecolor': 'black',
 # Course outcomes
 COURSE_OUTCOMES = ('Abandon', 'Succès', 'Échec')
 COURSE_NB_OUTCOMES = len(COURSE_OUTCOMES)
+
+# Other
+SECONDS_PER_MINUTE = 60

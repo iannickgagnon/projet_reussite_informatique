@@ -6,9 +6,9 @@ import pandas as pd
 # Internal libraries
 from events_parser import (
     __get_course_id,
-    __get_semester,
+    __get_semester_id,
     __time_str_to_float,
-    __get_members_list,
+    __get_students_list,
     parse_events,
 )
 
@@ -69,7 +69,7 @@ def test_get_course_id_no_match(test_data_raw):
 
 
 def test_get_semester(test_data_raw):
-    assert __get_semester(test_data_raw) == 'A2022'
+    assert __get_semester_id(test_data_raw) == 'A2022'
 
 
 def test_get_semester_no_match(test_data_raw):
@@ -78,7 +78,7 @@ def test_get_semester_no_match(test_data_raw):
     test_data_raw.loc[0, COL_NAME_CONTEXT] = 'This is a context without a semester id'
 
     with pytest.raises(ValueError):
-        __get_semester(test_data_raw)
+        __get_semester_id(test_data_raw)
 
 
 def test_time_str_to_float():
@@ -87,24 +87,24 @@ def test_time_str_to_float():
     assert __time_str_to_float('02:45') == 2.75
 
 
-def test_get_members_list(test_data_raw):
+def test_get_students_list(test_data_raw):
 
     # Expected unique names
     expected_names = ['John Doe', 'Jane Doe', 'Invalid Student']
 
     # Extract unique member names
-    obtained_names = __get_members_list(test_data_raw)
+    obtained_names = __get_students_list(test_data_raw)
 
     assert set(obtained_names) == set(expected_names)
 
 
-def test_get_members_list_no_match():
+def test_get_students_list_no_match():
 
     # Create dummy context without a name column
     df_no_match = pd.DataFrame({'No match': []})
 
     with pytest.raises(KeyError):
-        __get_members_list(df_no_match)
+        __get_students_list(df_no_match)
 
 
 def test_parse_events(test_data_expected_events):
