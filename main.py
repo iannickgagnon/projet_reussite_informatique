@@ -31,6 +31,7 @@ from constants import (
     SURVEY_NUMERICAL_QUESTIONS_INDEX,
     COURSE_NB_OUTCOMES,
     COURSE_OUTCOMES,
+    _100_PERCENT,
 )
 
 
@@ -321,7 +322,7 @@ def analysis_6():
         plt.xlabel('Modèle')
         plt.ylabel('Précision [%]')
 
-    # Show all three graphs
+    # Show all
     plt.show()
 
 
@@ -364,44 +365,26 @@ def analysis_7():
         plt.show()
 
 
-if __name__ == '__main__':
-
-    '''
-    analysis_1_a('INF135_02.csv')
-    analysis_1_b('INF135_02.csv')
-    analysis_1_c('INF135_02.csv')
-    analysis_2()
-    analysis_3()
-    analysis_4()
-    analysis_5()
-    analysis_6()
-    '''
-    analysis_7()
-    '''
-    # Rebuild and save
-    courses = Course.build_course_list_from_files()
-    with open('courses.pkl', 'wb') as file:
-        pickle.dump(courses, file)
-    '''
-
-"""
-if __name__ != '__main__':
+def analysis_8():
+    """
+    Compiles survey answers, calculates confidence intervals, prints formatted results and plots selected results.
+    """
 
     # Load data
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
     # Compile survey results
-    nb_compiled_survey_results = Course.compile_survey_results(courses)
+    compiled_survey_results = Course.compile_survey_results(courses)
 
     # Count the total number of answers
-    total_counts = sum((sum(d.values()) for d in questions_and_outcomes[0].values()))
+    total_counts = sum((sum(d.values()) for d in compiled_survey_results[0].values()))
 
     # Initialize data structure for box plots
     box_plot_data = []
 
     # Parse answers
-    for question_index, question in enumerate(questions_and_outcomes.values()):
+    for question_index, question in enumerate(compiled_survey_results.values()):
 
         # No confidence intervals for numerical questions
         if question_index in SURVEY_NUMERICAL_QUESTIONS_INDEX:
@@ -425,15 +408,15 @@ if __name__ != '__main__':
             lower, upper = bootstrap_calculate_confidence_interval(sample)
 
             # Transform in percentages
-            value = value / total_counts * 100
-            lower = lower / total_counts * 100
-            upper = upper / total_counts * 100
+            value = value / total_counts * _100_PERCENT
+            lower = lower / total_counts * _100_PERCENT
+            upper = upper / total_counts * _100_PERCENT
 
             # Show proportions for each answer
             print(f'\tANSWER \'{answer_key}\': {value:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\n')
 
             # Parse outcomes
-            outcomes = questions_and_outcomes[question_index][answer_key]
+            outcomes = compiled_survey_results[question_index][answer_key]
 
             # Generate bins from question dictionary
             bins_outcomes = list(outcomes.values())
@@ -444,6 +427,7 @@ if __name__ != '__main__':
                                                                       sum(bins_outcomes),
                                                                       COURSE_NB_OUTCOMES)
 
+            # Calculate confidence intervals on bootstrap outcomes
             outcome_index = 0
             for outcome_key, value_outcome, sample_outcome in zip(COURSE_OUTCOMES, bins_outcomes, bootstrap_outcomes):
 
@@ -460,20 +444,26 @@ if __name__ != '__main__':
                 lower, upper = bootstrap_calculate_confidence_interval(sample_outcome)
 
                 # Transform in percentages
-                value_outcome = value_outcome / total_outcomes * 100
-                lower = lower / total_outcomes * 100
-                upper = upper / total_outcomes * 100
+                value_outcome = value_outcome / total_outcomes * _100_PERCENT
+                lower = lower / total_outcomes * _100_PERCENT
+                upper = upper / total_outcomes * _100_PERCENT
 
                 # Show proportions for each answer
                 print(f'\t\t\'{outcome_key:7s}\': {value_outcome:<4.1f}% [{lower:4.1f}, {upper:4.1f}]\t')
 
             print()
 
-    # SITUATION FINANCIERE ECHEC
-    with plt.style.context('./images/main_plot_style.mplstyle'):
+    # Generate plots
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
 
-        fig, ax = plt.subplots()
+        '''
+            Financial situation
+        '''
 
+        # Create plot
+        _, ax1 = plt.subplots()
+
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (71, 74, 77)
 
         # Sample sizes
@@ -482,179 +472,211 @@ if __name__ != '__main__':
         n3 = box_plot_data[box_plot_data_indexes[2]][4]
         n_total = n1 + n2 + n3
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplot
+        ax1.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax1.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Aisée (n = {n1})', f'Satisfaisante (n = {n2})', f'Précaire (n = {n3})'))
+        # Add answer labels with sample sizes
+        ax1.set_xticklabels((f'Aisée (n = {n1})', f'Satisfaisante (n = {n2})', f'Précaire (n = {n3})'))
+
+        # Decorate
         plt.title(f'Relation entre la situation financière et l\'échec (n = {n_total})')
         plt.ylabel('Taux d\'échec [%]')
 
-        plt.show()
+        '''
+            Having children or not
+        '''
 
-    # ENFANTS VS ABANDON
-    with plt.style.context('./images/main_plot_style.mplstyle'):
+        # Create plot
+        _, ax2 = plt.subplots()
 
-        fig, ax = plt.subplots()
-
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (57, 60)
-
-        # Perform t-test
-        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3],
-                                               box_plot_data[box_plot_data_indexes[1]][3])
-        test_str = f'Test Mann-Whitney U : p < 0.001'
 
         # Sample sizes
         n1 = box_plot_data[box_plot_data_indexes[0]][4]
         n2 = box_plot_data[box_plot_data_indexes[1]][4]
         n_total = n1 + n2
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplot
+        ax2.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax2.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Enfants (n = {n1})', f'Pas d\'enfants (n = {n2})'))
+        # Add answer labels with sample sizes
+        ax2.set_xticklabels((f'Enfants (n = {n1})', f'Pas d\'enfants (n = {n2})'))
+
+        # Decorate
         plt.title(f'Relation entre le fait d\'avoir des enfants et l\'abandon (n = {n_total})')
         plt.ylabel('Taux d\'abandon [%]')
 
-        plt.show()
+        '''
+            Language spoken at home
+        '''
 
-    # LANGUE MATERNELLE ET ABANDON
-    with plt.style.context('./images/main_plot_style.mplstyle'):
-        fig, ax = plt.subplots()
+        # Create plot
+        _, ax3 = plt.subplots()
 
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (48, 54)
-
-        # Perform t-test
-        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3],
-                                               box_plot_data[box_plot_data_indexes[1]][3])
-        test_str = f'Test Mann-Whitney U : p < 0.001'
 
         # Sample sizes
         n1 = box_plot_data[box_plot_data_indexes[0]][4]
         n2 = box_plot_data[box_plot_data_indexes[1]][4]
         n_total = n1 + n2
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplot
+        ax3.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax3.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Français (n = {n1})', f'Autre (n = {n2})'))
+        # Add answer labels with sample sizes
+        ax3.set_xticklabels((f'Français (n = {n1})', f'Autre (n = {n2})'))
+
+        # Decorate
         plt.title(f'Relation entre la langue parlée à la maison et l\'abandon (n = {n_total})')
         plt.ylabel('Taux d\'abandon [%]')
 
-        plt.show()
+        '''
+            Mother tongue
+        '''
 
-    # LANGUE MATERNELLE ET ABANDON
-    with plt.style.context('./images/main_plot_style.mplstyle'):
+        # Create plot
+        _, ax4 = plt.subplots()
 
-        fig, ax = plt.subplots()
-
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (39, 45)
-
-        # Perform t-test
-        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3], box_plot_data[box_plot_data_indexes[1]][3])
-        test_str = f'Test Mann-Whitney U : p < 0.001'
 
         # Sample sizes
         n1 = box_plot_data[box_plot_data_indexes[0]][4]
         n2 = box_plot_data[box_plot_data_indexes[1]][4]
         n_total = n1 + n2
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplots
+        ax4.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax4.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Français (n = {n1})', f'Autre (n = {n2})'))
+        # Add answer labels with sample sizes
+        ax4.set_xticklabels((f'Français (n = {n1})', f'Autre (n = {n2})'))
+
+        # Decorate
         plt.title(f'Relation entre la langue maternelle et l\'abandon (n = {n_total})')
         plt.ylabel('Taux d\'abandon [%]')
 
-        plt.show()
+        '''
+            Work and study situation
+        '''
 
-    # ETUDES VS ETUDES ET TRAVAIL
-    with plt.style.context('./images/main_plot_style.mplstyle'):
+        # Create plot
+        _, ax5 = plt.subplots()
 
-        fig, ax = plt.subplots()
-
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (32, 38)
-
-        # Perform t-test
-        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3], box_plot_data[box_plot_data_indexes[1]][3])
-        test_str = f'Test Mann-Whitney U : p < 0.001'
 
         # Sample sizes
         n1 = box_plot_data[box_plot_data_indexes[0]][4]
         n2 = box_plot_data[box_plot_data_indexes[1]][4]
         n_total = n1 + n2
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplots
+        ax5.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax5.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Études (n = {n1})', f'Études + travail (n = {n2})'))
+        # Add answer labels with sample sizes
+        ax5.set_xticklabels((f'Études (n = {n1})', f'Études + travail (n = {n2})'))
+
+        # Decorate
         plt.title(f'Relation entre le travail et l\'échec (n = {n_total})')
         plt.ylabel('Taux d\'échec [%]')
 
-        plt.show()
+        '''
+            Retaking the course and failure
+        '''
 
-    # REPRISE VS ECHEC
-    with plt.style.context('./images/main_plot_style.mplstyle'):
+        # Create plot
+        _, ax6 = plt.subplots()
 
-        fig, ax = plt.subplots()
-
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (2, 5)
-
-        # Perform t-test
-        t_statistic, p_value = stats.ttest_ind(box_plot_data[box_plot_data_indexes[0]][3], box_plot_data[box_plot_data_indexes[1]][3])
-        test_str = f'Test Mann-Whitney U : p < 0.001'
 
         # Sample sizes
         n1 = box_plot_data[box_plot_data_indexes[0]][4]
         n2 = box_plot_data[box_plot_data_indexes[1]][4]
         n_total = n1 + n2
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplots
+        ax6.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax6.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Reprise (n = {n1})', f'Pas reprise (n = {n2})'))
+        # Add answer labels with sample sizes
+        ax6.set_xticklabels((f'Reprise (n = {n1})', f'Pas reprise (n = {n2})'))
+
+        # Decorate
         plt.title(f'Relation entre la reprise d\'un cours et l\'échec (n = {n_total})')
         plt.ylabel('Taux d\'échec [%]')
 
-        plt.show()
+        '''
+            Retaking the course and dropping
+        '''
 
-    # REPRISE VS ABANDON
-    with plt.style.context('./images/main_plot_style.mplstyle'):
+        # Create plot
+        _, ax7 = plt.subplots()
 
-        fig, ax = plt.subplots()
-
+        # Corresponding indexes in boxplot data structure
         box_plot_data_indexes = (0, 3)
-
-        # Perform t-test
-        t_statistic, p_value = stats.ttest_ind(box_plot_data[0][3], box_plot_data[1][3])
-        test_str = f'Test Mann-Whitney U : p < 0.001'
 
         # Sample sizes
         n1 = box_plot_data[0][4]
         n2 = box_plot_data[3][4]
         n_total = n1 + n2
 
-        ax.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
+        # Create boxplots
+        ax7.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
 
-        ax.yaxis.grid(True, linestyle='--', alpha=0.625)
+        # Add y-axis grid
+        ax7.yaxis.grid(True, linestyle='--', alpha=0.625)
 
-        ax.set_xticklabels((f'Reprise (n = {n1})', f'Pas reprise (n = {n2})'))
+        # Add answer labels with sample sizes
+        ax7.set_xticklabels((f'Reprise (n = {n1})', f'Pas reprise (n = {n2})'))
+
+        # Decorate
         plt.title(f'Relation entre la reprise d\'un cours et l\'abandon (n = {n_total})')
         plt.ylabel('Taux d\'abandon [%]')
 
-        plt.show()
+    # Show all
+    plt.show()
 
 
-    with plt.style.context('./images/main_plot_style.mplstyle'):
-        box_plot_data_indexes = (71, 74, 77)
-        plt.boxplot([box_plot_data[i][3] for i in box_plot_data_indexes])
-        plt.gca().set_xticklabels(('Aisée', 'Satisfaisante', 'Précaire'))
-        plt.title('Influence de la situation financière auto-déclarée')
-        plt.ylabel('Taux d\'échec [%]')
-        plt.show()
-"""
+if __name__ == '__main__':
+
+    '''
+    analysis_1_a('INF135_02.csv')
+    analysis_1_b('INF135_02.csv')
+    analysis_1_c('INF135_02.csv')
+    analysis_2()
+    analysis_3()
+    analysis_4()
+    analysis_5()
+    analysis_6()
+    analysis_7()
+    analysis_8()
+    '''
+
+    '''
+    # Rebuild and save
+    courses = Course.build_course_list_from_files()
+    with open('courses.pkl', 'wb') as file:
+        pickle.dump(courses, file)
+    '''
+
+
