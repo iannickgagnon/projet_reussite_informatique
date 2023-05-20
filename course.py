@@ -1,6 +1,7 @@
 
 # External libraries
 import os
+import pickle
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -245,7 +246,7 @@ class Course:
         assert weight_individual + weight_group_projects == _100_PERCENT, \
             f'Sum of weights not equal to 100 {weight_individual + weight_group_projects}'
 
-    def __get_individual_avg_vector(self, normalize=False):
+    def get_individual_avg_vector(self, normalize=False):
         """
         Gets the individual averages of all the students in the course.
 
@@ -266,7 +267,28 @@ class Course:
 
         return average
 
-    def __get_engagement_vector(self, normalize=False):
+    def get_quadratic_delay_vector(self, normalize=False):
+        """
+        Gets the individual averages of all the students in the course.
+
+        Args:
+            normalize (bool): Whether to normalize the output or not.
+
+        Returns:
+            (List[float]): The individual averages vector.
+        """
+
+        # TODO: list comprehension after unit tests are written
+        delay = []
+        for student in self.students:
+            delay.append(student.quadratic_delay)
+
+        if normalize:
+            delay = np.array(delay) / max(delay)
+
+        return delay
+
+    def get_engagement_vector(self, normalize=False):
         """
         Gets the number of events attended by each student in the course.
 
@@ -300,8 +322,8 @@ class Course:
         """
 
         # Get events counts and individual average
-        average = self.__get_individual_avg_vector()
-        nb_events = self.__get_engagement_vector(normalize=normalize)
+        average = self.get_individual_avg_vector()
+        nb_events = self.get_engagement_vector(normalize=normalize)
 
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
@@ -352,7 +374,7 @@ class Course:
         """
 
         # Get events counts and individual average
-        averages = self.__get_individual_avg_vector()
+        averages = self.get_individual_avg_vector()
 
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
@@ -401,7 +423,7 @@ class Course:
         """
 
         # Get events counts and individual average
-        engagement = self.__get_engagement_vector()
+        engagement = self.get_engagement_vector()
 
         # Plot
         with plt.style.context(PATH_MAIN_PLOT_STYLE):
@@ -514,8 +536,8 @@ class Course:
         for course in courses:
 
             # Get events counts and individual averages
-            course_averages = course.__get_individual_avg_vector()
-            course_nb_events = course.__get_engagement_vector(normalize=True)
+            course_averages = course.get_individual_avg_vector()
+            course_nb_events = course.get_engagement_vector(normalize=True)
 
             for i in range(len(course_averages)):
 
@@ -554,7 +576,6 @@ class Course:
         # course_list = Course.build_course_list_from_files()
 
         # TODO: Remove
-        import pickle
         with open('courses.pkl', 'rb') as file:
             course_list = pickle.load(file)
 
@@ -794,6 +815,9 @@ class Course:
                 # Get engagement proxy
                 engagement = current_student.nb_events
 
+                # Get quadratic time delay between events
+                delay = current_student.quadratic_delay
+
                 # Get pass/fail/abandon outcome
                 outcome = current_student.get_outcome()
 
@@ -805,10 +829,10 @@ class Course:
 
                 # Ignore students without surveys
                 if survey is not None:
-                    data.append([answer for answer in survey[0]] + [engagement, exam_result, outcome])
+                    data.append([answer for answer in survey[0]] + [delay, engagement, exam_result, outcome])
 
         # Build column names vector
-        column_names = [f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Engagement', 'EXAM01', 'Outcome']
+        column_names = [f'Q{i}' for i in range(1, SURVEY_NB_QUESTIONS + 1)] + ['Quadratic delay', 'Engagement', 'EXAM01', 'Outcome']
 
         # Return as a DataFrame
         return pd.DataFrame(data, columns=column_names)

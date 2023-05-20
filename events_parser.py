@@ -16,7 +16,7 @@ from constants import (
     COL_NAME_TIME,
     COL_NAME_NAME,
     PATH_EVENTS,
-    SECONDS_PER_MINUTE,
+    MINUTES_PER_HOUR,
 )
 
 
@@ -136,7 +136,7 @@ def __time_str_to_float(time: str) -> float:
     h, m = time.split(':')
 
     # Convert to float
-    time_float = float(h) + float(m) / SECONDS_PER_MINUTE
+    time_float = float(h) + float(m) / MINUTES_PER_HOUR
 
     return time_float
 

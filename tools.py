@@ -4,7 +4,11 @@ import numpy as np
 from typing import List
 from typing import Tuple
 from typing import Iterable
+from datetime import datetime
 import matplotlib.pyplot as plt
+
+# Internal constants
+from constants import HOURS_PER_DAY
 
 
 def bootstrap_calculate_confidence_interval(base_vector: np.array, alpha: float = 0.05) -> Tuple[float, float]:
@@ -245,3 +249,16 @@ def confidence_interval_to_string(value: (int, float),
 
     # Add end caps
     return '[' + confidence_interval_string + ']'
+
+
+def calculate_dates_difference_hours(start_date_str, end_date_str):
+
+    # Parse start and end dates
+    start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+
+    # Calculate time difference
+    time_difference = end_date - start_date
+
+    # Return difference in number of hours
+    return time_difference.days * HOURS_PER_DAY

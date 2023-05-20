@@ -2,6 +2,7 @@
 # External libraries
 import pickle
 import graphviz
+import numpy as np
 import pandas as pd
 from scipy import stats
 from sklearn.svm import SVC
@@ -10,6 +11,7 @@ from sklearn.tree import export_graphviz
 from tools import plot_confidence_intervals
 from predictor import run_model_and_evaluate
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from tools import bootstrap_generate_samples_from_bins
@@ -31,7 +33,13 @@ from constants import (
     SURVEY_NUMERICAL_QUESTIONS_INDEX,
     COURSE_NB_OUTCOMES,
     COURSE_OUTCOMES,
+    _0_EVENTS,
+    _0_PERCENT,
+    _50_PERCENT,
     _100_PERCENT,
+    PLOT_BORDER_MARGIN_FACTOR_SMALL,
+    PLOT_X_LABEL_ENGAGEMENT,
+    PASSING_GRADE,
 )
 
 
@@ -188,6 +196,7 @@ def analysis_2():
 
     # Export figure and axes
     return fig, ax
+
 
 
 def analysis_3():
@@ -657,6 +666,128 @@ def analysis_8():
     plt.show()
 
 
+def analysis_9():
+    """
+    Plots a list of courses' individual averages against quadratic delay.
+    """
+
+    is_plot_successes = True
+    is_plot_failures = True
+    is_linear_regression = True
+
+    # TODO: Remove
+    with open('courses.pkl', 'rb') as file:
+        courses = pickle.load(file)
+
+    quadratic_delay_pass = []
+    course_delays_pass = []
+    quadratic_delay_fail = []
+    course_delays_fail = []
+
+    # Split failures and successes
+    for course in courses:
+
+        # Get events counts and individual averages
+        course_averages = course.get_individual_avg_vector()
+        course_delays = course.get_quadratic_delay_vector()
+
+        for i in range(len(course_averages)):
+
+            # Separate failures from successes
+            if course_averages[i] >= PASSING_GRADE:
+                quadratic_delay_pass.append(course_averages[i])
+                course_delays_pass.append(course_delays[i])
+            else:
+                quadratic_delay_fail.append(course_averages[i])
+                course_delays_fail.append(course_delays[i])
+
+    # Plot
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+        # Create figure and axes
+        fig, ax = plt.subplots()
+
+        # Plot successes
+        if is_plot_successes:
+            ax.scatter(course_delays_pass, quadratic_delay_pass, color='royalblue', s=4)
+
+        # Plot failures
+        if is_plot_failures:
+            ax.scatter(course_delays_fail, quadratic_delay_fail, color='indianred', s=4)
+
+        # Build data vectors based on regression options
+        if is_plot_successes and is_plot_failures:
+            # Combine failures and successes
+            course_delays_fail.extend(course_delays_pass)
+            quadratic_delay_fail.extend(quadratic_delay_pass)
+            data_x = np.array(course_delays_fail).reshape(-1, 1)
+            data_y = np.array(quadratic_delay_fail).reshape(-1, 1)
+        elif is_plot_successes:
+            data_x = np.array(course_delays_pass).reshape(-1, 1)
+            data_y = np.array(quadratic_delay_pass).reshape(-1, 1)
+        else:
+            data_x = np.array(course_delays_fail).reshape(-1, 1)
+            data_y = np.array(quadratic_delay_fail).reshape(-1, 1)
+
+        # Linear regression for failures
+        if is_linear_regression:
+            # Create model
+            model = LinearRegression()
+            model.loss = 'mae'
+
+            # Fit model to data
+            model.fit(data_x, data_y)
+
+            # Find min/max for x-axis
+            x_min = course_delays_pass[np.argmin(course_delays_pass)]
+            x_max = course_delays_pass[np.argmax(course_delays_pass)]
+
+            # Model output
+            x_regression = np.linspace(x_min, x_max, 100)
+            y_regression = model.predict(x_regression[:, np.newaxis])
+
+            # Add to plot
+            ax.plot(x_regression, y_regression, 'k--')
+
+        # Labels
+        plt.xlabel('Quadratic delay [min^2]')
+        plt.ylabel('Individual average [%]')
+
+        # Limits
+        plt.xlim(_0_EVENTS, max(course_delays_pass + course_delays_fail) * PLOT_BORDER_MARGIN_FACTOR_SMALL)
+        plt.ylim(0, 100 * PLOT_BORDER_MARGIN_FACTOR_SMALL)
+
+        if is_plot_successes and is_plot_failures:
+            legend_items = ['Pass', 'Fail']
+        elif is_plot_successes:
+            legend_items = ['Pass']
+        else:
+            legend_items = ['Fail']
+
+        # Specify MAE regression in title
+        if is_linear_regression:
+            plt.title('Linear regression using Mean Absolute Error')
+
+        # Add legend
+        plt.legend(legend_items, loc='upper left')
+
+    # Show plot
+    plt.show()
+
+    # Print coefficients if regression is done
+    if is_linear_regression:
+        print(f'Slope     : {model.coef_[0][0]:.2f}')
+        print(f'Intercept : {model.intercept_[0]:.2f}')
+
+    with plt.style.context('./images/main_plot_style.mplstyle'):
+        plt.title('Relation entre le délai d\'engagement quadratique moyen et le résultat (n=719)')
+        plt.ylabel('Délai d\'engagement quadratique moyen [min^2]')
+        plt.legend(('Succès', 'Échec'))
+
+    # Export figure and axes
+    return fig, ax
+
+
 if __name__ == '__main__':
 
     '''
@@ -670,7 +801,10 @@ if __name__ == '__main__':
     analysis_6()
     analysis_7()
     analysis_8()
+
     '''
+
+    analysis_9()
 
     '''
     # Rebuild and save
@@ -678,5 +812,4 @@ if __name__ == '__main__':
     with open('courses.pkl', 'wb') as file:
         pickle.dump(courses, file)
     '''
-
 

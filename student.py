@@ -1,5 +1,6 @@
 # External libraries
 import pandas as pd
+from tools import calculate_dates_difference_hours
 
 # Internal constants
 from constants import (
@@ -71,6 +72,10 @@ class Student:
         self.group_work_average = None
         self.overall_average = None
         self.grade = None
+        self.quadratic_delay = None
+
+        # Calculate quadratic delay between events
+        self.__calculate_quadratic_engagement_delay()
 
     def __repr__(self):
         """
@@ -116,3 +121,19 @@ class Student:
             return OUTCOME_ABANDON
         else:
             return OUTCOME_SUCCES
+
+    def __calculate_quadratic_engagement_delay(self):
+        """
+        Calculates the mean quadratic time delay between events in hours.
+
+        Returns:
+            (float): The mean quadratic time delay between events in hours.
+        """
+
+        sum_ = 0.0
+        for i in range(len(self.events['Date']) - 1):
+            delta_date = calculate_dates_difference_hours(self.events['Date'].iat[i + 1], self.events['Date'].iat[i])
+            delta_time = self.events['Time'].iat[i + 1] - self.events['Time'].iat[i]
+            sum_ += (delta_date + delta_time)**2
+
+        self.quadratic_delay = sum_ / (len(self.events['Date']) - 1)
