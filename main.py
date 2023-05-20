@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 from sklearn.tree import export_graphviz
-from predictor import run_models_and_evaluate
+from predictor import run_model_and_evaluate
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -209,7 +209,6 @@ def analysis_5(show_graph=False):
     """
 
     # Load data
-    import pickle
     with open('courses.pkl', 'rb') as file:
         courses = pickle.load(file)
 
@@ -224,15 +223,16 @@ def analysis_5(show_graph=False):
     x_data, y_data, classes = encode_full_data(course_data)
 
     # Initialize Decision Tree model
-    models = {'Random forest': RandomForestClassifier()}
+    model = RandomForestClassifier()
+    model_name = 'Random forest'
 
     # Run model and evaluate
-    run_models_and_evaluate(models, x_data, y_data, classes, nb_bootstrap_samples=1000)
+    run_model_and_evaluate(model, model_name, x_data, y_data, classes, nb_bootstrap_samples=10)
 
     # Graphical representation
     if show_graph:
 
-        dot_data = export_graphviz(models['Random forest'],
+        dot_data = export_graphviz(model['Random forest'],
                                    out_file=None,
                                    feature_names=x_data.columns,
                                    class_names=classes,

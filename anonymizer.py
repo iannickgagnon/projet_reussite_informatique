@@ -17,7 +17,8 @@ def anonymize(course_id: str,
               events: pd.DataFrame = None,
               results: pd.DataFrame = None,
               surveys: survey.Survey = None,
-              clean_up: bool = False) -> Tuple[pd.DataFrame, pd.DataFrame, survey.Survey]:
+              clean_up: bool = False) \
+              -> Tuple[pd.DataFrame, pd.DataFrame, survey.Survey]:
     """
     Anonymize student data for a given course and semester.
 
