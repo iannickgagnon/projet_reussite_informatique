@@ -13,21 +13,15 @@ from constants import (
     COL_NAME_GRADE,
     _100_PERCENT,
     _0_PERCENT,
+    RESULTS_TOKENS_GROUP_PROJECTS,
+    RESULTS_TOKENS_MIDTERMS,
+    RESULTS_TOKENS_FINAL_EXAM,
+    RESULTS_TEAM_FLAG,
+    RESULTS_IDX_WEIGHT,
+    RESULTS_IDX_CORRECTED_ON,
+    RESULTS_IDX_GROUP_PROJECT,
+    RESULTS_COL_IDX_GRADE,
 )
-
-
-# TODO: Refactor in consants.py
-_TOKENS_GROUP_PROJECTS = ('TP', 'TRAVAIL', 'PRATIQUE', 'DEV')
-_TOKENS_MIDTERMS = ('INTRA', 'EXAM')
-_TOKENS_FINAL_EXAM = ('FINAL',)
-
-_INDEX_CORRECTED_ON = 'Corrected on'
-_INDEX_WEIGHT = 'Weight'
-_INDEX_GROUP_PROJECT = 'Group project'
-
-_COL_INDEX_GRADE = -1
-
-_TEAM_FLAG = 'Équ.'
 
 
 def __get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
@@ -54,7 +48,7 @@ def __get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
     df_structure = df_structure.astype(float)
 
     # Rename rows
-    df_structure.index = [_INDEX_CORRECTED_ON, _INDEX_WEIGHT]
+    df_structure.index = [RESULTS_IDX_CORRECTED_ON, RESULTS_IDX_WEIGHT]
 
     # Validate evaluation structure
     sum_of_weights = df_structure.iloc[1, :].sum()
@@ -101,12 +95,12 @@ def __standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:
         # Note: Finals need to be processed before midterms to avoid ambiguous names such as 'Examen Final'.
 
         # Build mapping
-        if any_token_in_string(col_name, _TOKENS_GROUP_PROJECTS):
+        if any_token_in_string(col_name, RESULTS_TOKENS_GROUP_PROJECTS):
             df.columns.values[col_index] = f'TP0{tp_count}'
             tp_count += 1
-        elif any_token_in_string(col_name, _TOKENS_FINAL_EXAM):
+        elif any_token_in_string(col_name, RESULTS_TOKENS_FINAL_EXAM):
             df.columns.values[col_index] = 'FINAL'
-        elif any_token_in_string(col_name, _TOKENS_MIDTERMS):
+        elif any_token_in_string(col_name, RESULTS_TOKENS_MIDTERMS):
             df.columns.values[col_index] = f'EXAM0{exam_count}'
             exam_count += 1
 
@@ -124,7 +118,7 @@ def __add_team_work_flag_row(df: pd.DataFrame) -> pd.DataFrame:
         (pd.DataFrame): The modified DataFrame.
     """
 
-    df.loc[_INDEX_GROUP_PROJECT] = [True if 'TP' in col else False for col in df.columns]
+    df.loc[RESULTS_IDX_GROUP_PROJECT] = [True if 'TP' in col else False for col in df.columns]
 
     return df
 
@@ -150,7 +144,7 @@ def __get_grades(df: pd.DataFrame) -> pd.DataFrame:
     cols_to_drop = [2, 3, 4, 5]
     for j in range(2, df_grades.shape[1] - 2):
 
-        is_team_work_flag = df_team_work_flag.iat[j] == _TEAM_FLAG
+        is_team_work_flag = df_team_work_flag.iat[j] == RESULTS_TEAM_FLAG
         is_nan = pd.to_numeric(df_grades.iloc[:, j], errors='coerce').isnull().all()
 
         if is_team_work_flag or is_nan:
@@ -170,7 +164,8 @@ def __get_grades(df: pd.DataFrame) -> pd.DataFrame:
         df_grades[col] = df_grades[col].astype(float)
 
     # Remove trailing spaces in grades column
-    df_grades[df_grades.columns[_COL_INDEX_GRADE]] = df_grades[df_grades.columns[_COL_INDEX_GRADE]].apply(str.strip)
+    df_grades[df_grades.columns[RESULTS_COL_IDX_GRADE]] = \
+        df_grades[df_grades.columns[RESULTS_COL_IDX_GRADE]].apply(str.strip)
 
     # Reset indexes
     df_grades.reset_index(drop=True, inplace=True)
@@ -225,9 +220,9 @@ def __normalize_grades(df_structure: pd.DataFrame, df_grades: pd.DataFrame) -> p
         (pd.DataFrame): The normalized grades DataFrame.
     """
     for col in df_structure.columns:
-        if df_structure[col].loc[_INDEX_CORRECTED_ON] != _100_PERCENT and \
-           df_structure[col].loc[_INDEX_CORRECTED_ON] != _0_PERCENT:
-            df_grades[col] *= 100 / df_structure[col].loc[_INDEX_CORRECTED_ON]
+        if df_structure[col].loc[RESULTS_IDX_CORRECTED_ON] != _100_PERCENT and \
+           df_structure[col].loc[RESULTS_IDX_CORRECTED_ON] != _0_PERCENT:
+            df_grades[col] *= 100 / df_structure[col].loc[RESULTS_IDX_CORRECTED_ON]
 
             if any(df_grades[col] > 100):
                 pass
@@ -305,6 +300,8 @@ def parse_results(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # Adjust filename
     if not isfile(filename):
         filename = PATH_RESULTS + filename
+        if not isfile(filename):
+            raise FileExistsError('Results file not found')
 
     # Read raw file
     df_raw = pd.read_csv(filename, sep=';')
