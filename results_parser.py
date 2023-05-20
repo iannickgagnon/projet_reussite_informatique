@@ -3,7 +3,7 @@
 import pandas as pd
 from typing import Tuple
 from os.path import isfile
-from typing import Iterable
+from tools import any_token_in_string
 
 # Internal constants
 from constants import (
@@ -55,21 +55,6 @@ def __get_evaluation_structure(df: pd.DataFrame) -> pd.DataFrame:
     assert sum_of_weights == 100, f'Sum of evaluation weights not equal to 100 ({sum_of_weights})'
 
     return df_structure
-
-
-def any_token_in_string(string: str, tokens: Iterable[str]) -> bool:
-    """
-    Check if any of the given tokens is present in the given string.
-
-    Args:
-        string (str): The string to check.
-        tokens (Iterable[str]): The tokens to look for.
-
-    Returns:
-        (bool): True if any of the tokens is present in the string, False otherwise.
-    """
-
-    return any(token in string for token in tokens)
 
 
 def __standardize_structure_column_names(df: pd.DataFrame) -> pd.DataFrame:

@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 from sklearn.tree import export_graphviz
+from tools import plot_confidence_intervals
 from predictor import run_model_and_evaluate
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
@@ -20,6 +21,8 @@ from predictor import encode_full_data
 from results_parser import parse_results
 
 # Internal constants
+from constants import PATH_MAIN_PLOT_STYLE
+
 from constants import (
     SURVEY_NB_QUESTIONS,
 )
@@ -244,6 +247,78 @@ def analysis_5(show_graph=False):
         graph.view()
 
 
+def analysis_6():
+    """
+    Plots confidence 95% intervals for the 3 different classes.
+    """
+
+    # Abandon class confidence intervals
+    low = [42, 64, 67, 77, 80, 83]
+    mid = [53, 79, 80, 91, 92, 94]
+    high = [68, 93, 94, 100, 100, 100]
+
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+        # Create
+        ax1 = plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
+
+        # Adjust y-axis limits
+        plt.ylim([40, 102.5])
+
+        # Add y-axis grid
+        ax1.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        # Decorate
+        plt.title('Intervalles de confiance 95% pour l\'abandon')
+        plt.xlabel('Modèle')
+        plt.ylabel('Précision [%]')
+
+    # Échec class confidence intervals
+    low = [43, 54, 52, 70, 71, 78]
+    mid = [52, 67, 68, 84, 86, 90]
+    high = [62, 81, 85, 86, 100, 100]
+
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+        # Create
+        ax2 = plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
+
+        # Adjust y-axis limits
+        plt.ylim([40, 102.5])
+
+        # Add y-axis grid
+        ax2.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        # Decorate
+        plt.title('Intervalles de confiance 95% pour l\'échec')
+        plt.xlabel('Modèle')
+        plt.ylabel('Précision [%]')
+
+    # Succès class confidence intervals
+    low = [95, 95, 90, 95, 95, 96]
+    mid = [98, 95, 93, 97, 97, 99]
+    high = [100, 96, 95, 100, 100, 100]
+
+    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+
+        # Create
+        ax3 = plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
+
+        # Adjust y-axis limits
+        plt.ylim([40, 102.5])
+
+        # Add y-axis grid
+        ax3.yaxis.grid(True, linestyle='--', alpha=0.625)
+
+        # Decorate
+        plt.title('Intervalles de confiance 95% pour le succès')
+        plt.xlabel('Modèle')
+        plt.ylabel('Précision [%]')
+
+    # Show all three graphs
+    plt.show()
+
+
 if __name__ == '__main__':
 
     '''
@@ -253,8 +328,11 @@ if __name__ == '__main__':
     analysis_2()
     analysis_3()
     analysis_4()
-    '''
     analysis_5()
+    
+    '''
+
+    analysis_6()
 
     '''
     # Rebuild and save

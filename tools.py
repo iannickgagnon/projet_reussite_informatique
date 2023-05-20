@@ -2,10 +2,8 @@
 # External libraries
 import numpy as np
 from typing import Tuple
+from typing import Iterable
 import matplotlib.pyplot as plt
-
-# Internal constants
-from constants import PATH_MAIN_PLOT_STYLE
 
 
 def bootstrap_calculate_confidence_interval(base_vector: np.array, alpha: float = 0.05) -> Tuple[float, float]:
@@ -94,77 +92,42 @@ def plot_confidence_intervals(low: list, mid: list, high: list, x_labels: list =
     LINE_COLOR = 'steelblue'    # Line color
     DOT_COLOR = 'indianred'     # Color of center dot
 
+    # Initialize figure and axes
+    fig, ax = plt.subplots()
+
     for i in range(len(low)):
+
         # Vertical line
-        plt.plot([i, i], [low[i], high[i]], color=LINE_COLOR)
+        ax.plot([i, i], [low[i], high[i]], color=LINE_COLOR)
 
         # Tip lines
         left = i - 0.5 * TIP_LINE_WIDTH
         right = i + 0.5 * TIP_LINE_WIDTH
 
         # Tip lines
-        plt.plot([left, right], [high[i], high[i]], color=LINE_COLOR)
-        plt.plot([left, right], [low[i], low[i]], color=LINE_COLOR)
+        ax.plot([left, right], [high[i], high[i]], color=LINE_COLOR)
+        ax.plot([left, right], [low[i], low[i]], color=LINE_COLOR)
 
         # Center dot
-        plt.plot(i, mid[i], 'o', color=DOT_COLOR)
+        ax.plot(i, mid[i], 'o', color=DOT_COLOR)
 
     # Change x labels
     if x_labels is not None:
         plt.xticks(list(range(len(low))), x_labels)
 
-
-if __name__ == '__main__':
-
-    # TODO: Clean up
-
-    # CIs for Abandon
-
-    '''low = [42, 64, 67, 77, 80, 83]
-    mid = [53, 79, 80, 91, 92, 94]
-    high = [68, 93, 94, 100, 100, 100]
-    
-    with plt.style.context(PATH_MAIN_PLOT_STYLE):
-
-        plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
-        plt.title('Intervalles de confiance 95% pour l\'abandon')
-        plt.xlabel('Modèle')
-        plt.ylabel('Précision [%]')
-        plt.ylim([40, 102.5])
-        plt.gca().yaxis.grid(True, linestyle='--', alpha=0.625)
-        plt.show()'''
+    return ax
 
 
-    # CIs for Fail
+def any_token_in_string(string: str, tokens: Iterable[str]) -> bool:
+    """
+    Check if any of the given tokens is present in the given string.
 
-    low = [43, 54, 52, 70, 71, 78]
-    mid = [52, 67, 68, 84, 86, 90]
-    high = [62, 81, 85, 86, 100, 100]
-    
-    with plt.style.context(PATH_MAIN_PLOT_STYLE):
+    Args:
+        string (str): The string to check.
+        tokens (Iterable[str]): The tokens to look for.
 
-        plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
-        plt.title('Intervalles de confiance 95% pour l\'échec')
-        plt.xlabel('Modèle')
-        plt.ylabel('Précision [%]')
-        plt.ylim([40, 102.5])
-        plt.gca().yaxis.grid(True, linestyle='--', alpha=0.625)
-        plt.show()
+    Returns:
+        (bool): True if any of the tokens is present in the string, False otherwise.
+    """
 
-
-    # CIs for Fail
-    '''
-    low = [95, 95, 90, 95, 95, 96]
-    mid = [98, 95, 93, 97, 97, 99]
-    high = [100, 96, 95, 100, 100, 100]
-
-    with plt.style.context(PATH_MAIN_PLOT_STYLE):
-        plot_confidence_intervals(low, mid, high, x_labels=['1A', '1B', '1C', '2', '3', '4'])
-        plt.title('Intervalles de confiance 95% pour le succès')
-        plt.xlabel('Modèle')
-        plt.ylabel('Précision [%]')
-        plt.ylim([40, 102.5])
-        plt.show()
-    '''
-
-
+    return any(token in string for token in tokens)
