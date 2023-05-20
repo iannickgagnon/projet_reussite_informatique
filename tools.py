@@ -116,6 +116,8 @@ def plot_confidence_intervals(low: list, mid: list, high: list, x_labels: list =
 
 if __name__ == '__main__':
 
+    # TODO: Clean up
+
     # CIs for Abandon
 
     '''low = [42, 64, 67, 77, 80, 83]

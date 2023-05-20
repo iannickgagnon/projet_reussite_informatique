@@ -140,6 +140,8 @@ def confidence_interval_to_string(value: (int, float),
 
 if __name__ == '__main__':
 
+    # TODO: Clean up
+
     # CIs for retaking the course and abandon
 
     low = [17.4, 3.8]
@@ -173,6 +175,8 @@ if __name__ == '__main__':
     '''
 
 if __name__ == '__main__':
+
+    # TODO: Clean up
 
     # Load pickled dataset
     with open('courses.pkl', 'rb') as file:

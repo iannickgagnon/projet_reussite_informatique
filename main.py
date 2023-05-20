@@ -171,7 +171,6 @@ def analysis_2():
                                                                 is_plot_successes=True,
                                                                 is_plot_failures=True)
 
-    # TODO: Remove
     with plt.style.context('./images/main_plot_style.mplstyle'):
         plt.title('Relation entre l\'engagement et le résultat (n=719)')
         plt.ylabel('Moyenne obtenue au cours [%]')
@@ -205,7 +204,7 @@ def analysis_4():
 
 def analysis_5(show_graph=False):
     """
-    Plots the stacked histograms of failures and successes distributions.
+    Evaluates Random forest model and displays results.
     """
 
     # Load data
