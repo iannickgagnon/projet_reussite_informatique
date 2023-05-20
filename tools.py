@@ -90,9 +90,9 @@ def plot_confidence_intervals(low: list, mid: list, high: list, x_labels: list =
       Nothing.
     """
 
-    TIP_LINE_WIDTH = 0.25  # Width of the top and bottom lines
-    LINE_COLOR = 'steelblue'  # Line color
-    DOT_COLOR = 'indianred'  # Color of center dot
+    TIP_LINE_WIDTH = 0.25       # Width of the top and bottom lines
+    LINE_COLOR = 'steelblue'    # Line color
+    DOT_COLOR = 'indianred'     # Color of center dot
 
     for i in range(len(low)):
         # Vertical line
