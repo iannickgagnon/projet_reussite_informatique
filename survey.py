@@ -1,5 +1,6 @@
 
 # External libraries
+from copy import deepcopy
 from os.path import isfile
 
 # Internal libraries
@@ -215,3 +216,45 @@ class Survey:
             return None
         else:
             return Survey(answers=[answers for answers in self if answers.student_name == student_name])
+
+
+    @staticmethod
+    def build_compiled_survey_results_data_structure() -> dict:
+
+        # Build outcome data structure
+        OUTCOMES = {outcome: 0 for outcome in ('Abandon', 'Succès', 'Échec')}
+
+        # Build yes/no question data structure
+        YES_NO = {'Oui': OUTCOMES.copy(),
+                  'Non': OUTCOMES.copy()}
+
+        # Build summer job data structure
+        EMPLOI_ETE = {'Études seulement': OUTCOMES.copy(),
+                      'Travail seulement': OUTCOMES.copy(),
+                      'Études et travail': OUTCOMES.copy()}
+
+        # Build language data structure
+        LANGUE = {'Français': OUTCOMES.copy(),
+                  'Anglais': OUTCOMES.copy(),
+                  'Autre': OUTCOMES.copy()}
+
+        # Build financial situation data structure
+        SITUATION_FINANCIERE = {'Aisée': OUTCOMES.copy(),
+                                'Satisfaisante': OUTCOMES.copy(),
+                                'Précaire': OUTCOMES.copy()}
+
+        # Build compiled survey results data structure
+        questions_and_outcomes = {0: deepcopy(YES_NO),
+                                  1: deepcopy(YES_NO),
+                                  2: deepcopy(YES_NO),
+                                  3: deepcopy(YES_NO),
+                                  4: deepcopy(YES_NO),
+                                  5: deepcopy(EMPLOI_ETE),
+                                  6: [],
+                                  7: deepcopy(LANGUE),
+                                  8: deepcopy(LANGUE),
+                                  9: deepcopy(YES_NO),
+                                  10: deepcopy(YES_NO),
+                                  11: deepcopy(SITUATION_FINANCIERE)}
+
+        return questions_and_outcomes

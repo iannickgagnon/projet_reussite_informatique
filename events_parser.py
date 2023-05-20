@@ -2,9 +2,8 @@
 # External libraries
 import re
 import pandas as pd
-from os.path import isfile
-
 from typing import Tuple
+from os.path import isfile
 
 # Internal constants
 from constants import (

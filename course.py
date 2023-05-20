@@ -4,7 +4,6 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
-from copy import deepcopy
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 from sklearn.linear_model import LinearRegression
@@ -47,6 +46,7 @@ from constants import (
     PLOT_BORDER_MARGIN_FACTOR_SMALL,
     PLOT_HISTOGRAM_CONFIG,
     SURVEY_NB_QUESTIONS,
+    SURVEY_NUMERICAL_QUESTIONS_INDEX,
 )
 
 
@@ -770,46 +770,6 @@ class Course:
         # Export figure and axes
         return fig, ax
 
-    @staticmethod
-    def build_compiled_survey_results_data_structure() -> dict:
-
-        # Build outcome data structure
-        OUTCOMES = {outcome: 0 for outcome in ('Abandon', 'Succès', 'Échec')}
-
-        # Build yes/no question data structure
-        YES_NO = {'Oui': OUTCOMES.copy(),
-                  'Non': OUTCOMES.copy()}
-
-        # Build summer job data structure
-        EMPLOI_ETE = {'Études seulement': OUTCOMES.copy(),
-                      'Travail seulement': OUTCOMES.copy(),
-                      'Études et travail': OUTCOMES.copy()}
-
-        # Build language data structure
-        LANGUE = {'Français': OUTCOMES.copy(),
-                  'Anglais': OUTCOMES.copy(),
-                  'Autre': OUTCOMES.copy()}
-
-        # Build financial situation data structure
-        SITUATION_FINANCIERE = {'Aisée': OUTCOMES.copy(),
-                                'Satisfaisante': OUTCOMES.copy(),
-                                'Précaire': OUTCOMES.copy()}
-
-        # Build compiled survey results data structure
-        questions_and_outcomes = {0: deepcopy(YES_NO),
-                                  1: deepcopy(YES_NO),
-                                  2: deepcopy(YES_NO),
-                                  3: deepcopy(YES_NO),
-                                  4: deepcopy(YES_NO),
-                                  5: deepcopy(EMPLOI_ETE),
-                                  6: [],
-                                  7: deepcopy(LANGUE),
-                                  8: deepcopy(LANGUE),
-                                  9: deepcopy(YES_NO),
-                                  10: deepcopy(YES_NO),
-                                  11: deepcopy(SITUATION_FINANCIERE)}
-
-        return questions_and_outcomes
 
     @staticmethod
     def course_list_to_table(list_of_courses: list):
@@ -852,3 +812,41 @@ class Course:
 
         # Return as a DataFrame
         return pd.DataFrame(data, columns=column_names)
+
+
+    @staticmethod
+    def compile_survey_results(courses: list) -> dict:
+
+        # Initialize compiled survey results container
+        compiled_survey_results = Survey.build_compiled_survey_results_data_structure()
+
+        # Compile student surveys for each course
+        for course in courses:
+            for answers in course.surveys:
+                for student in course.students:
+                    if student.name == answers.student_name:
+                        for question_index, answer in enumerate(answers):
+                            if question_index not in SURVEY_NUMERICAL_QUESTIONS_INDEX:
+                                compiled_survey_results[question_index][answer][student.get_outcome()] += 1
+
+        return compiled_survey_results
+
+
+    @staticmethod
+    def compile_hours_worked_outcome(courses: list) -> Tuple[list, list]:
+
+        # Initialize results containers
+        nb_hours = []
+        nb_hours_outcome = []
+
+        # Compile student surveys for each course
+        for course in courses:
+            for answers in course.surveys:
+                for student in course.students:
+                    if student.name == answers.student_name:
+                        for question_index, answer in enumerate(answers):
+                            if question_index in SURVEY_NUMERICAL_QUESTIONS_INDEX:
+                                nb_hours.append(answers[question_index])
+                                nb_hours_outcome.append(student.get_outcome())
+
+        return nb_hours, nb_hours_outcome
