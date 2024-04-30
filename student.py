@@ -1,6 +1,12 @@
 # External libraries
 import pandas as pd
-from tools import calculate_dates_difference_hours
+
+# Internal libraries
+from tools import (
+    calculate_dates_difference_hours,
+    remove_accents,
+)
+
 
 # Internal constants
 from constants import (
@@ -59,6 +65,9 @@ class Student:
             results (DataFrame): A DataFrame containing the student's results.
         """
 
+        # Clean name string
+        name = remove_accents(name).replace('?', '')
+
         # Store raw data
         self.name = name
         self.events = events
@@ -75,7 +84,7 @@ class Student:
         self.quadratic_delay = None
 
         # Calculate quadratic delay between events
-        self.__calculate_quadratic_engagement_delay()
+        # self.__calculate_quadratic_engagement_delay()
 
     def __repr__(self):
         """

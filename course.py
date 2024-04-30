@@ -164,6 +164,9 @@ class Course:
             # Extract name
             name = self.results.iloc[i][COL_NAME_NAME]
 
+            if '\'' in name[1:-2]:
+                continue
+
             # Extract student's data
             events = self.get_student_events_by_name(name)
             results = self.get_student_results_by_name(name)
@@ -189,7 +192,7 @@ class Course:
             (DataFrame): The events associated with the student.
         """
 
-        return self.events.query(f'{COL_NAME_NAME} == \'{name}\'')
+        return self.events.query(f'{COL_NAME_NAME} == \"{name.strip()}\"')
 
     def get_student_results_by_name(self, name: str):
         """
@@ -481,26 +484,44 @@ class Course:
         filenames_results = os.listdir(path_results_files)
         filenames_surveys = os.listdir(path_results_surveys)
 
+        # Get file extensions
+        extension_events = filenames_events[0].split('.')[-1]
+        extension_results = filenames_results[0].split('.')[-1]
+        extension_surveys = filenames_surveys[0].split('.')[-1]
+
+        # Remove extensions
+        filenames_events = [filename.split('.')[0] for filename in filenames_events]
+        filenames_results = [filename.split('.')[0] for filename in filenames_results]
+        filenames_surveys = [filename.split('.')[0] for filename in filenames_surveys]
+
         # Find filenames
         filenames = set(filenames_events) & set(filenames_results) & set(filenames_surveys)
 
         course_list = []
         for filename in filenames:
 
-            # Parse
-            events_data, course_id, semester_id = parse_events(filename)
-            evaluation_structure, results_data = parse_results(filename)
+            try:
 
-            # FIXME: This won't work because files are not synced
-            surveys_data = Survey(filename)
+                # Parse
+                events_data, course_id, semester_id = parse_events(filename + '.' + extension_events)
+                evaluation_structure, results_data = parse_results(filename + '.' + extension_results,)
+
+                # FIXME: This won't work because files are not synced
+                surveys_data = Survey(filename + '.' + extension_surveys)
+
+            except Exception as e:
+                print(f'Error parsing {filename}: {e}')
+                continue
 
             # Anonymize
+            '''
             events_data, results_data, surveys_data = anonymize(course_id,
                                                                 semester_id,
                                                                 events=events_data,
                                                                 results=results_data,
                                                                 surveys=surveys_data,
                                                                 clean_up=False)
+            '''
 
             # Build current course
             current_course = Course(evaluation_structure,
@@ -848,7 +869,7 @@ class Course:
         for course in courses:
             for answers in course.surveys:
                 for student in course.students:
-                    if student.name == answers.student_name:
+                    if answers.student_name == student.name:
                         for question_index, answer in enumerate(answers):
                             if question_index not in SURVEY_NUMERICAL_QUESTIONS_INDEX:
                                 compiled_survey_results[question_index][answer][student.get_outcome()] += 1

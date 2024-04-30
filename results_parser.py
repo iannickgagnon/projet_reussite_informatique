@@ -289,7 +289,10 @@ def parse_results(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
             raise FileExistsError('Results file not found')
 
     # Read raw file
-    df_raw = pd.read_csv(filename, sep=';')
+    if filename.endswith('.csv'):
+        df_raw = pd.read_csv(filename, sep=';')
+    elif filename.endswith('.xlsx') or filename.endswith('.xls'):
+        df_raw = pd.read_excel(filename)
 
     # Extract evaluation structure
     df_structure = __build_evaluation_structure_data(df_raw)

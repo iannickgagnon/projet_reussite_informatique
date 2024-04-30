@@ -41,7 +41,10 @@ def parse_events(filename: str) -> Tuple[pd.DataFrame, str, str]:
             raise FileExistsError('Events file not found')
 
     # Import raw file
-    df = pd.read_csv(filename)
+    if filename.endswith('.csv'):
+        df = pd.read_csv(filename)
+    elif filename.endswith('.xlsx') or filename.endswith('.xls'):
+        df = pd.read_excel(filename)
 
     # Get course info before removing columns
     course_id = __get_course_id(df)
@@ -84,7 +87,7 @@ def __get_course_id(data: pd.DataFrame) -> str:
     """
 
     # Get context string
-    context_str = data.loc[0].at[COL_NAME_CONTEXT]
+    context_str = data.loc[0][COL_NAME_CONTEXT]
 
     # Extract course ID as a re.Match object
     course_id_match = re.search('[A-Z]{3}[0-9]{3}-[0-9]{2}', context_str)
@@ -133,7 +136,7 @@ def __time_str_to_float(time: str) -> float:
     """
 
     # Extract hours and minutes
-    h, m = time.split(':')
+    h, m, _ = time.split(':')
 
     # Convert to float
     time_float = float(h) + float(m) / MINUTES_PER_HOUR

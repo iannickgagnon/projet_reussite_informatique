@@ -43,7 +43,9 @@ from constants import (
 )
 
 
-def analysis_1_a(filename: str,
+def analysis_1_a(filename_events: str,
+                 filename_results: str,
+                 filename_survey: str,
                  is_anonymize: bool = False,
                  is_regression: bool = False):
     """
@@ -51,16 +53,16 @@ def analysis_1_a(filename: str,
     """
 
     # Get events data
-    events_data, course_id, semester_id = parse_events(filename)
+    events_data, course_id, semester_id = parse_events(filename_events)
 
     # Get evaluation structure and grades
-    evaluation_structure, results_data = parse_results(filename)
+    evaluation_structure, results_data = parse_results(filename_results)
 
     # Anonymize
     if is_anonymize:
 
         # Get surveys data
-        surveys_data = Survey(filename)
+        surveys_data = Survey(filename_survey)
 
         # Invoke anonymizer
         events_data, results_data, surveys_data = anonymize(course_id,
@@ -90,23 +92,25 @@ def analysis_1_a(filename: str,
     return fig, ax
 
 
-def analysis_1_b(filename: str,
+def analysis_1_b(filename_events: str,
+                 filename_results: str,
+                 filename_survey: str,
                  is_anonymize: bool = False):
     """
     Plots a given course's average grades distribution.
     """
 
     # Get events data
-    events_data, course_id, semester_id = parse_events(filename)
+    events_data, course_id, semester_id = parse_events(filename_events)
 
     # Get evaluation structure and grades
-    evaluation_structure, results_data = parse_results(filename)
+    evaluation_structure, results_data = parse_results(filename_results)
 
     # Anonymize
     if is_anonymize:
 
         # Get surveys data
-        surveys_data = Survey(filename)
+        surveys_data = Survey(filename_survey)
 
         # Invoke anonymizer
         events_data, results_data, surveys_data = anonymize(course_id,
@@ -135,23 +139,25 @@ def analysis_1_b(filename: str,
     return fig, ax
 
 
-def analysis_1_c(filename: str,
+def analysis_1_c(filename_events: str,
+                 filename_results: str,
+                 filename_survey: str,
                  is_anonymize: bool = False):
     """
     Plots a given course's average engagement distribution.
     """
 
     # Get events data
-    events_data, course_id, semester_id = parse_events(filename)
+    events_data, course_id, semester_id = parse_events(filename_events)
 
     # Get evaluation structure and grades
-    evaluation_structure, results_data = parse_results(filename)
+    evaluation_structure, results_data = parse_results(filename_results)
 
     # Anonymize
     if is_anonymize:
 
         # Get surveys data
-        surveys_data = Survey(filename)
+        surveys_data = Survey(filename_survey)
 
         # Invoke anonymizer
         events_data, results_data, surveys_data = anonymize(course_id,
@@ -790,10 +796,12 @@ def analysis_9():
 
 if __name__ == '__main__':
 
+    analysis_8()
+
     '''
-    analysis_1_a('INF135_02.csv')
-    analysis_1_b('INF135_02.csv')
-    analysis_1_c('INF135_02.csv')
+    analysis_1_c('MAT144_01.csv',
+                 'MAT144_01.xls',
+                 'MAT144.csv')
     analysis_2()
     analysis_3()
     analysis_4()
@@ -801,15 +809,11 @@ if __name__ == '__main__':
     analysis_6()
     analysis_7()
     analysis_8()
-
     '''
-
-    analysis_9()
-
+    
     '''
     # Rebuild and save
     courses = Course.build_course_list_from_files()
     with open('courses.pkl', 'wb') as file:
         pickle.dump(courses, file)
     '''
-

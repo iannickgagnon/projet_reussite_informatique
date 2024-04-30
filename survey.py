@@ -4,6 +4,7 @@ from copy import deepcopy
 from os.path import isfile
 
 # Internal libraries
+from tools import remove_accents
 from survey_answers import SurveyAnswers
 
 # Internal constants
@@ -75,17 +76,25 @@ class Survey:
             # Split current line
             parts = ligne.split(',')
 
+            # Find the index at which the first 'Oui' or 'Non' answer is located
+            for i, part in enumerate(parts):
+                if part == '"Oui"' or part == '"Non"':
+                    parts = parts[i + 1: i + SURVEY_NB_QUESTIONS + 4]
+                    break
+
+            parts = [part for part in parts if part != '' and part != '""']
+
             # Ignore if incomplete
-            if len(parts) != SURVEY_LINE_LENGTH_COMPLETE:
+            if len(parts) != SURVEY_LINE_LENGTH_COMPLETE + 3:
                 continue
 
             # Store cleaned up answers
-            indexed_answers = enumerate(parts[SURVEY_LINE_ANSWER_Q1: SURVEY_LINE_ANSWER_Q1 + SURVEY_NB_QUESTIONS])
+            indexed_answers = list(enumerate(parts))[:-2]
             current_answers = {i: response[1:len(response) - 1].replace('"', '') for i, response in indexed_answers}
 
             # Build current student name
             current_student_name = \
-                f'{parts[SURVEY_LINE_FIRST_NAME]} {parts[SURVEY_LINE_LAST_NAME]}'.replace('"', '').replace('\n', '')
+                remove_accents(f'{parts[-2]} {parts[-1]}'.replace('"', '').replace('\n', '')).replace('?', '')
 
             # Add filled-in answers to list
             if all(current_answers.values()):
@@ -249,12 +258,13 @@ class Survey:
                                   2: deepcopy(YES_NO),
                                   3: deepcopy(YES_NO),
                                   4: deepcopy(YES_NO),
-                                  5: deepcopy(EMPLOI_ETE),
-                                  6: [],
-                                  7: deepcopy(LANGUE),
+                                  5: deepcopy(YES_NO),
+                                  6: deepcopy(EMPLOI_ETE),
+                                  7: [],
                                   8: deepcopy(LANGUE),
-                                  9: deepcopy(YES_NO),
+                                  9: deepcopy(LANGUE),
                                   10: deepcopy(YES_NO),
-                                  11: deepcopy(SITUATION_FINANCIERE)}
+                                  11: deepcopy(YES_NO),
+                                  12: deepcopy(SITUATION_FINANCIERE)}
 
         return questions_and_outcomes

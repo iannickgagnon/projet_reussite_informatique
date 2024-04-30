@@ -1,7 +1,7 @@
 
 # External libraries
+import unicodedata
 import numpy as np
-from typing import List
 from typing import Tuple
 from typing import Iterable
 from datetime import datetime
@@ -155,7 +155,7 @@ def bootstrap_generate_base_vector_from_bins(bins: Iterable) -> np.array:
 def bootstrap_generate_samples_from_bins(bins: Iterable,
                                          total_count: int,
                                          nb_bins: int,
-                                         nb_samples: int = 1000) -> List[np.array]:
+                                         nb_samples: int = 1000) -> list[np.array]:
     """
     Creates bootstrap samples from bins. For example, the bins [2, 6, 4] resul in the base vector
     [0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2]. This vector is sampled randomly with replacement to generate said bootstrap
@@ -262,3 +262,21 @@ def calculate_dates_difference_hours(start_date_str, end_date_str):
 
     # Return difference in number of hours
     return time_difference.days * HOURS_PER_DAY
+
+
+def remove_accents(input_str):
+    """
+    Removes accents from a given string.
+
+    Args:
+        input_str (str): The input string.
+
+    Returns:
+        (str): The input string without accents.
+    """
+
+    # Normalize string
+    normalized_form = unicodedata.normalize('NFKD', input_str)
+    
+    # Remove combining characters (e.g. "e" (U+0065) + "´" (U+0301) combines to form "é" (U+00E9))
+    return u"".join([c for c in normalized_form if not unicodedata.combining(c)])
